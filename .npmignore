@@ -1,0 +1,6 @@
+**/*
+*.md
+.*
+_*
+*.log
+!dist/chassis.min.js
