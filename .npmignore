@@ -3,4 +3,4 @@
 .*
 _*
 *.log
-!dist/chassis.min.js
+!dist/chassis.x.min.js
