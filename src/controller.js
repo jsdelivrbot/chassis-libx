@@ -132,7 +132,7 @@ if (!NGN) {
       let me = this
       Object.keys(this.references).forEach(function (r) {
         if (!NGN.ref.hasOwnProperty(r)) {
-          NGN.ref.create(r, me[r])
+          NGN.ref.create(r, me.references[r])
         }
       })
 
