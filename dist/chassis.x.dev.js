@@ -1,5 +1,5 @@
 /**
-  * v1.0.0 generated on: Sat Apr 30 2016 16:02:56 GMT-0500 (CDT)
+  * v1.0.5 generated on: Sat Apr 30 2016 21:11:38 GMT-0500 (CDT)
   * Copyright (c) 2014-2016, Ecor Ventures LLC. All Rights Reserved. See LICENSE (BSD).
   */
 'use strict'
@@ -135,8 +135,8 @@ if (!NGN) {
       // Generate references
       let me = this
       Object.keys(this.references).forEach(function (r) {
-        if (!NGN.ref.hasOwnProperty(r)) {
-          NGN.ref.create(r, me[r])
+        if (NGN.ref[r] === undefined || NGN.ref[r] === null) {
+          NGN.ref.create(r, me.references[r])
         }
       })
 
