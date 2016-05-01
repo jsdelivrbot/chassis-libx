@@ -131,7 +131,7 @@ if (!NGN) {
       // Generate references
       let me = this
       Object.keys(this.references).forEach(function (r) {
-        if (!NGN.ref.hasOwnProperty(r)) {
+        if (NGN.ref[r] === undefined || NGN.ref[r] === null) {
           NGN.ref.create(r, me.references[r])
         }
       })

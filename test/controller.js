@@ -14,11 +14,15 @@ test('Global', function (t) {
 
   var MyController = new NGNX.Controller({
     scope: 'test.',
+    references: {
+      test: '#test1'
+    },
     stores: {
       mystore: Models
     }
   })
 
+  t.ok(NGN.ref.test !== undefined, 'Reference created.')
   t.ok(MyController.store.hasOwnProperty('mystore'), 'Store registered successfully.')
 
   NGN.BUS.on('test.record.create', function (record) {
