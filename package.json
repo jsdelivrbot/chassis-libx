@@ -1,6 +1,6 @@
 {
   "name": "ngnx-chassis",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "The opininated 'extra' library for NGN.",
   "main": "index.js",
   "scripts": {
