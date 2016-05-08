@@ -6,25 +6,26 @@ if (!NGN) {
   window.NGNX = window.NGNX || {}
 
   /**
-   * @class NGNX.Controller
-   * Controllers can be used to easily reference different components of an
-   * application, such as data stores or DOM elements.
+   * @class NGNX.Driver
+   * Drivers can be used to easily reference & direct communication between
+   * components of an application, such as data stores or DOM elements.
    *
    * NGN is based on the concept of a service bus (NGN.BUS), so the NGNX concept
-   * of a controller differs from the tradtional MVC approach in subtle ways.
-   * The biggest difference is a controller is designed to trigger events on the
-   * bus, but it only responds to select events (or none at all).
+   * of a driver differs from a tradtional MVC approach in subtle ways.
+   * The biggest difference is a driver is designed to trigger events on the
+   * global event bus. It also listens to the global event bus, responding
+   * only to a selection of events it cares about.
    *
-   * NGNX.Controller is designed to simplify event triggering and isolate
+   * NGNX.Driver is designed to simplify event triggering and isolate
    * application logic in an opinionated way (keep it brutally simple). See the
    * options associated with each configuration property for specific details.
    *
-   * This class was designed to be extended, acting mostly as a standard way to
-   * trigger scoped events. It can be extended with any level of logic by adding
+   * This class was designed to be extended, acting primarily as a standard way
+   * to trigger scoped events. It can be extended with any level of logic by adding
    * custom methods, properties, configurations, etc. For more details about
-   * extending controllers, see the NGNX Controller guide.
+   * extending drivers, see the NGNX.Driver guide.
    */
-  class _Controller {
+  class _Driver {
     constructor (cfg) {
       cfg = cfg || {}
 
@@ -32,8 +33,8 @@ if (!NGN) {
         /**
          * @cfg {string} [scope]
          * The scope is prepended to NGN.BUS events. For example, setting
-         * this to `mycontroller.` will trigger events like
-         * `mycontroller.eventname` instead of just `eventname`.
+         * this to `mydriver.` will trigger events like
+         * `mydriver.eventname` instead of just `eventname`.
          */
         scope: NGN.define(true, false, false, cfg.scope || null),
 
@@ -43,16 +44,16 @@ if (!NGN) {
          * reference name, while each value is a DOM selector pattern. Providing
          * references here is the same as writing `NGN.ref.create('key',
          * 'selector/value')` for each reference (this is a shortcut method).
-         * Additionally, these references are associated with the controller for
+         * Additionally, these references are associated with the driver for
          * easy access.
          *
          * A reference can be accessed in one of two ways:
          *
          * 1. NGN.ref.key
-         * 1. Controller.ref.key or Controller.dom.key
+         * 1. Driver.ref.key or Driver.dom.key
          *
          * ```js
-         * var Controller = new NGNX.Controller({
+         * var Driver = new NGNX.Driver({
          *   references: {
          *   	 buttons: 'body > button',
          *   	 nav: 'body > header > nav:first-of-type',
@@ -62,11 +63,11 @@ if (!NGN) {
          *
          * NGN.ref.buttons.forward('click', NGN.BUS.attach('some.event'))
          * // same as
-         * Controller.ref.buttons.forward('click', NGN.BUS.attach('some.event'))
+         * Driver.ref.buttons.forward('click', NGN.BUS.attach('some.event'))
          * // same as
-         * Controller.dom.buttons.forward('click', NGN.BUS.attach('some.event'))
+         * Driver.dom.buttons.forward('click', NGN.BUS.attach('some.event'))
          * // same as
-         * Controller.dom.buttons.addEventListener('click', function (e) {
+         * Driver.dom.buttons.addEventListener('click', function (e) {
          *   NGN.BUS.emit('some.event', e)
          * })
          * ```
@@ -79,7 +80,7 @@ if (!NGN) {
 
         /**
          * @cfgproperty {Object} [stores]
-         * An object of NGN.DATA.Store references to associate with the controller.
+         * An object of NGN.DATA.Store references to associate with the driver.
          *
          * ```js
          * var MyStore = new NGN.DATA.Store({
@@ -92,15 +93,15 @@ if (!NGN) {
          *   allowDuplicates: false
          * })
          *
-         * var Controller = new NGNX.Controller({
+         * var Driver = new NGNX.Driver({
          *   datastores: {
          *   	 a: MyStore,
          *   	 b: MyOtherStore
          *   }
          * })
          *
-         * console.log(Controller.store.a.records) // dumps the records for MyModel
-         * console.log(Controller.store.b.records) // dumps the records for MyOtherModel
+         * console.log(Driver.store.a.records) // dumps the records for MyModel
+         * console.log(Driver.store.b.records) // dumps the records for MyOtherModel
          * ```
          * @type {Object}
          */
@@ -108,7 +109,7 @@ if (!NGN) {
 
         /**
          * @property {Array} events
-         * Contains a list of events that can be triggered by this controller.
+         * Contains a list of events that can be triggered by this driver.
          * @private
          */
         events: NGN.define(false, true, false, []),
@@ -146,19 +147,19 @@ if (!NGN) {
 
     /**
      * @method addStore
-     * Add a new datastore reference to the controller.
+     * Add a new datastore reference to the driver.
      *
      * **Example:**
      *
      * ```js
      * let MyStore = new NGN.DATA.Store({...})
-     * let MyController = new NGNX.Controller({
+     * let MyDriver = new NGNX.Driver({
      *   ...
      * })
      *
-     * MyController.addStore('mystore', MyStore)
+     * MyDriver.addStore('mystore', MyStore)
      *
-     * console.log(MyController.store.mystore.records) // dumps the records
+     * console.log(MyDriver.store.mystore.records) // dumps the records
      * ```
      * @param {String} referenceName
      * The name by which the datastore can be retrieved.
@@ -174,7 +175,7 @@ if (!NGN) {
             NGN.BUS.off(me.scope + e)
           })
         }
-        console.warn('Controller already had a reference to ' + name + ', which has been overwritten.')
+        console.warn('Driver already had a reference to ' + name + ', which has been overwritten.')
       }
       this.datastores[name] = store
       this.scopeStoreEvents(name)
@@ -184,7 +185,7 @@ if (!NGN) {
      * @method scopeStoreEvents
      * Apply the #scope prefix to each datastore event.
      * @param {String} name
-     * The controller reference name to the store.
+     * The Driver reference name to the store.
      * @param {boolean} suppressWarning
      * Suppress the warning message if the scope is not defined.
      * @private
@@ -199,13 +200,13 @@ if (!NGN) {
           })
         })
       } else if (!suppress) {
-        console.warn('Controller.scopeStoreEvents called without a defined scope.')
+        console.warn('Driver.scopeStoreEvents called without a defined scope.')
       }
     }
 
     /**
      * @property {Object} store
-     * Returns the #datastores associated with the controller.
+     * Returns the #datastores associated with the Driver.
      */
     get store () {
       return this.datastores
@@ -237,15 +238,15 @@ if (!NGN) {
      */
     on (topic, handler) {
       if (!NGN.BUS) {
-        console.warn("NGNX.Controller.on('" + topic + "', ...) will not work because NGN.BUS is not available.")
+        console.warn("NGNX.Driver.on('" + topic + "', ...) will not work because NGN.BUS is not available.")
         return
       }
       if (this.events.indexOf(topic) >= 0) {
         NGN.BUS.on(topic, handler)
       } else {
-        console.warn(topic + ' is not a supported event for this Controller.')
+        console.warn(topic + ' is not a supported event for this Driver.')
       }
     }
   }
-  NGNX.Controller = _Controller
+  NGNX.Driver = _Driver
 }

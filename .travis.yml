@@ -26,7 +26,7 @@ deploy:
       - dist/chassis.x.min.js
       - dist/chassis.x.dev.js
       - dist/httpproxy.min.js
-      - dist/controller.min.js
+      - dist/driver.min.js
       - dist/state.min.js
       - bower.json
     skip_cleanup: true

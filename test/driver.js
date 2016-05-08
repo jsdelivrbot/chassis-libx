@@ -12,7 +12,7 @@ test('Global', function (t) {
     model: Model
   })
 
-  var MyController = new NGNX.Controller({
+  var MyController = new NGNX.Driver({
     scope: 'test.',
     references: {
       test: '#test1'
