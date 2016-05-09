@@ -231,7 +231,8 @@ if (!NGN) {
       }
       // If the parent is a function, treat it asa callback
       if (typeof parent === 'function') {
-        return NGN.HTTP.template(this.templates[name], parent)
+        NGN.HTTP.template(this.templates[name], parent)
+        return
       }
       // If the parent is a selector, reference the element.
       if (typeof parent === 'string') {
@@ -352,6 +353,68 @@ if (!NGN) {
       } else {
         console.warn(topic + ' is not a supported event for this Driver.')
       }
+    }
+
+    /**
+     * @method pool
+     * A shortcut method to create an NGN.BUS.pool. This method will automatically
+     * apply the #scope prefix to the pool. It is possible to create multiple pools
+     * by using an "extra" scope.
+     *
+     * **Example**
+     * ```js
+     * let MyDriver = new NGNX.Driver({
+     *   scope: 'myprefix.'
+     * })
+     *
+     * MyDriver.pool('extra.', {
+     *   demo: function () {
+     *     ...
+     *   }
+     * })
+     *
+     * // The above is equivalent to:
+     *
+     * NGN.BUS.pool('myprefix.extra.', {
+     *   demo: function () { ... }
+     * })
+     * ```
+     *
+     * If "extra" scope isn't necessary, it will still apply the #scope to events
+     * in order to associate the events with this store.
+     *
+     * ```js
+     * let MyDriver = new NGNX.Driver({
+     *   scope: 'myprefix.'
+     * })
+     *
+     * MyDriver.pool({
+     * 	 demo: function () {...}
+     * })
+     *
+     * // The above is equivalent to:
+     *
+     * NGN.BUS.pool('myprefix.', {
+     *   demo: function () { ... }
+     * })
+     * ```
+     *
+     * While this is a simple abstraction, it offers a code organization benefit.
+     * Drivers can encapsulate BUS event logic in one place using a driver.
+     * @param {string} [extrascope]
+     * An extra scope to add to event listeners.
+     * @param {object} handlers
+     * An object containing event listeners. See NGN.BUS.pool for syntax and
+     * examples.
+     */
+    pool (extra, data) {
+      if (!extra && typeof extra === 'object') {
+        data = extra
+        extra = ''
+      }
+      var scope = (this.scope + extra).trim()
+      scope = scope.length > 0 ? scope : null
+      NGN.BUS.pool(scope, data)
     }
   }
   NGNX.Driver = _Driver

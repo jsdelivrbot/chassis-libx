@@ -26,6 +26,7 @@ var getFiles = function () {
     'https://cdn.jsdelivr.net/chassis/1.0.34/chassis.min.js',
     'src/data/httpproxy.js',
     'src/driver.js',
+    'src/loader.js',
     'src/state.js',
     'test/*.js',
     'test/test.html'

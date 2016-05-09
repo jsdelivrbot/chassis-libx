@@ -52,7 +52,7 @@ gulp.task('clean', function (next) {
 
 gulp.task('copy', function () {
   console.log('Copying distribution files to ', DIR.dist)
-  var files = ['driver', 'state', 'data/httpproxy']
+  var files = ['driver', 'loader', 'state', 'data/httpproxy']
   var sources = files.map(function (file) {
     return path.join(DIR.source, file + '.js')
   })

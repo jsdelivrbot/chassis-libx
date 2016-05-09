@@ -2,7 +2,7 @@
 
 var test = require('tape')
 
-test('Global', function (t) {
+test('NGNX.Driver', function (t) {
   var Model = new NGN.DATA.Model({
     fields: {
       test: null
@@ -32,8 +32,20 @@ test('Global', function (t) {
     t.pass('Scoped event bubbling successfully triggered on NGN.BUS.')
     t.ok(record.test === 'test', 'Data update recognized.')
     // MyController.render('test', {}, function (el) {
-      // t.ok(el instanceof Element, 'A proper element was returned by the template reference.')
-    t.end()
+    // t.ok(el instanceof Element, 'A proper element was returned by the template reference.')
+    MyController.pool('extra.', {
+      demo: function () {
+        NGN.BUS.emit('all.done')
+      }
+    })
+
+    NGN.BUS.once('all.done', function () {
+      t.pass('Driver event pooling triggered successfully.')
+      t.end()
+    })
+
+    NGN.BUS.emit('test.extra.demo')
+
     // })
   })
 
