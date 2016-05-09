@@ -19,6 +19,9 @@ test('Global', function (t) {
     },
     stores: {
       mystore: Models
+    },
+    templates: {
+      test: './test/test.html'
     }
   })
 
@@ -28,7 +31,10 @@ test('Global', function (t) {
   NGN.BUS.on('test.record.create', function (record) {
     t.pass('Scoped event bubbling successfully triggered on NGN.BUS.')
     t.ok(record.test === 'test', 'Data update recognized.')
+    // MyController.render('test', {}, function (el) {
+      // t.ok(el instanceof Element, 'A proper element was returned by the template reference.')
     t.end()
+    // })
   })
 
   MyController.store.mystore.add({
