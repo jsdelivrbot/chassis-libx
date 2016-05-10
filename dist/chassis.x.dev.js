@@ -1,5 +1,5 @@
 /**
-  * v1.0.12 generated on: Tue May 10 2016 09:54:06 GMT-0500 (CDT)
+  * v1.0.13 generated on: Tue May 10 2016 10:12:42 GMT-0500 (CDT)
   * Copyright (c) 2014-2016, Ecor Ventures LLC. All Rights Reserved. See LICENSE (BSD).
   */
 'use strict'
@@ -548,16 +548,12 @@ if (!NGN) {
 
       // Load asynchronous files
       if (this.async.length > 0) {
-        console.log(window.location)
-        console.log('BREAKPOINT 1')
         NGN.HTTP.import(this.async, function (imported) {
-          console.log('BREAKPOINT 2')
           // Force a slight delay to assure everything is loaded.
           setTimeout(function () {
             if (typeof callback === 'function') {
               callback(me.sync.concat(imported))
             } else {
-              console.log(callback)
               NGN.BUS.emit(callback, me.sync.concat(me.async))
             }
           }, 5)

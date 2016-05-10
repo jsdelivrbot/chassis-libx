@@ -122,16 +122,12 @@ if (!NGN) {
 
       // Load asynchronous files
       if (this.async.length > 0) {
-        console.log(window.location)
-        console.log('BREAKPOINT 1')
         NGN.HTTP.import(this.async, function (imported) {
-          console.log('BREAKPOINT 2')
           // Force a slight delay to assure everything is loaded.
           setTimeout(function () {
             if (typeof callback === 'function') {
               callback(me.sync.concat(imported))
             } else {
-              console.log(callback)
               NGN.BUS.emit(callback, me.sync.concat(me.async))
             }
           }, 5)
