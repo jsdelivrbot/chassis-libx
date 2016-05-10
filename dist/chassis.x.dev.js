@@ -1,5 +1,5 @@
 /**
-  * v1.0.13 generated on: Tue May 10 2016 10:12:42 GMT-0500 (CDT)
+  * v1.0.14 generated on: Tue May 10 2016 10:45:20 GMT-0500 (CDT)
   * Copyright (c) 2014-2016, Ecor Ventures LLC. All Rights Reserved. See LICENSE (BSD).
   */
 'use strict'
@@ -412,7 +412,7 @@ if (!NGN) {
      * examples.
      */
     pool (extra, data) {
-      if (!extra && typeof extra === 'object') {
+      if (typeof extra === 'object') {
         data = extra
         extra = ''
       }

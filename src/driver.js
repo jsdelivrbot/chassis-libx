@@ -408,7 +408,7 @@ if (!NGN) {
      * examples.
      */
     pool (extra, data) {
-      if (!extra && typeof extra === 'object') {
+      if (typeof extra === 'object') {
         data = extra
         extra = ''
       }
