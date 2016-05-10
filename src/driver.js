@@ -243,6 +243,7 @@ if (!NGN) {
           return
         }
       }
+      position = position || 'beforeend'
       NGN.HTTP.template(this.templates[name], function (element) {
         if (['beforebegin', 'afterbegin', 'afterend'].indexOf(position.trim().toLowerCase()) < 0) {
           parent.appendChild(element)

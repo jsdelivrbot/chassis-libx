@@ -1,5 +1,5 @@
 /**
-  * v1.0.14 generated on: Tue May 10 2016 10:45:20 GMT-0500 (CDT)
+  * v1.0.15 generated on: Tue May 10 2016 10:50:45 GMT-0500 (CDT)
   * Copyright (c) 2014-2016, Ecor Ventures LLC. All Rights Reserved. See LICENSE (BSD).
   */
 'use strict'
@@ -247,6 +247,7 @@ if (!NGN) {
           return
         }
       }
+      position = position || 'beforeend'
       NGN.HTTP.template(this.templates[name], function (element) {
         if (['beforebegin', 'afterbegin', 'afterend'].indexOf(position.trim().toLowerCase()) < 0) {
           parent.appendChild(element)
