@@ -231,7 +231,7 @@ if (!NGN) {
       }
       // If the parent is a function, treat it asa callback
       if (typeof parent === 'function') {
-        NGN.HTTP.template(this.templates[name], parent)
+        NGN.HTTP.template(this.templates[name], data, parent)
         return
       }
       // If the parent is a selector, reference the element.
@@ -244,7 +244,7 @@ if (!NGN) {
         }
       }
       position = position || 'beforeend'
-      NGN.HTTP.template(this.templates[name], function (element) {
+      NGN.HTTP.template(this.templates[name], data, function (element) {
         if (['beforebegin', 'afterbegin', 'afterend'].indexOf(position.trim().toLowerCase()) < 0) {
           parent.appendChild(element)
         } else {

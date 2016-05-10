@@ -1,5 +1,5 @@
 /**
-  * v1.0.15 generated on: Tue May 10 2016 10:50:45 GMT-0500 (CDT)
+  * v1.0.16 generated on: Tue May 10 2016 13:03:13 GMT-0500 (CDT)
   * Copyright (c) 2014-2016, Ecor Ventures LLC. All Rights Reserved. See LICENSE (BSD).
   */
 'use strict'
@@ -235,7 +235,7 @@ if (!NGN) {
       }
       // If the parent is a function, treat it asa callback
       if (typeof parent === 'function') {
-        NGN.HTTP.template(this.templates[name], parent)
+        NGN.HTTP.template(this.templates[name], data, parent)
         return
       }
       // If the parent is a selector, reference the element.
@@ -248,7 +248,7 @@ if (!NGN) {
         }
       }
       position = position || 'beforeend'
-      NGN.HTTP.template(this.templates[name], function (element) {
+      NGN.HTTP.template(this.templates[name], data, function (element) {
         if (['beforebegin', 'afterbegin', 'afterend'].indexOf(position.trim().toLowerCase()) < 0) {
           parent.appendChild(element)
         } else {
