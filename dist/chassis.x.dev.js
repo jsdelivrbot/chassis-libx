@@ -1,5 +1,5 @@
 /**
-  * v1.0.16 generated on: Tue May 10 2016 13:03:13 GMT-0500 (CDT)
+  * v1.0.17 generated on: Thu May 12 2016 17:44:02 GMT-0500 (CDT)
   * Copyright (c) 2014-2016, Ecor Ventures LLC. All Rights Reserved. See LICENSE (BSD).
   */
 'use strict'
@@ -420,6 +420,37 @@ if (!NGN) {
       var scope = (this.scope + extra).trim()
       scope = scope.length > 0 ? scope : null
       NGN.BUS.pool(scope, data)
+    }
+
+    /**
+     * @method emit
+     * This is a shortcut to NGN.BUS.emit, but it adds the #scope to the event.
+     *
+     * **Example**:
+     * ```js
+     * let MyDriver = new NGNX.Driver({
+     *   scope: 'myprefix.'
+     * })
+     *
+     * MyDriver.emit('some.event') // <--- Emit event
+     * ```
+     * The last line where the event is emitted will actually send an event
+     * called `prefix.some.event` to the NGN BUS. In other words, the last line
+     * is the equivalent of running:
+     *
+     * ```js
+     * NGN.BUS.emit('prefix.some.event')
+     * ```
+     *
+     * The "value-add" of this method is prepending the scope automatically.
+     * It also supports payloads (just like NGN.BUS.emit).
+     * @param {string} eventName
+     * The name of the event to trigger (with the #scope prefixed to it).
+     * @param {object|string|number|boolean|array} payload
+     * An object to send to the event handler.
+     */
+    emit (eventName, payload) {
+      NGN.BUS.emit(this.scope + eventName, payload)
     }
   }
   NGNX.Driver = _Driver
