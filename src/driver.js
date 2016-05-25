@@ -246,7 +246,7 @@ if (!NGN) {
           return
         }
       }
-      position = position || 'beforeend'
+      position = (position || 'beforeend').toLowerCase()
       let me = this
       NGN.HTTP.template(this.templates[name], data, function (element) {
         if (NGN.hasOwnProperty('DOM')) {
@@ -262,8 +262,19 @@ if (!NGN) {
     adjustedRender (parent, element, position) {
       if (['beforebegin', 'afterbegin', 'afterend'].indexOf(position.trim().toLowerCase()) < 0) {
         parent.appendChild(element)
+        NGN.BUS.emit('DOM.element.created', element)
       } else {
         parent.insertAdjacentHTML(position, element.outerHTML)
+        switch (position) {
+          case 'beforebegin':
+            return NGN.BUS.emit('template.render', parent.previousSibling)
+          case 'afterend':
+            return NGN.BUS.emit('template.render', parent.nextSibling)
+          case 'afterbegin':
+            return NGN.BUS.emit('template.render', parent.firstChild)
+          default:
+            return NGN.BUS.emit('template.render', parent.lastChild)
+        }
       }
     }
 

@@ -1,5 +1,5 @@
 /**
-  * v1.0.20 generated on: Wed May 25 2016 10:34:48 GMT-0500 (CDT)
+  * v1.0.21 generated on: Wed May 25 2016 12:23:34 GMT-0500 (CDT)
   * Copyright (c) 2014-2016, Ecor Ventures LLC. All Rights Reserved. See LICENSE (BSD).
   */
 'use strict'
@@ -250,7 +250,7 @@ if (!NGN) {
           return
         }
       }
-      position = position || 'beforeend'
+      position = (position || 'beforeend').toLowerCase()
       let me = this
       NGN.HTTP.template(this.templates[name], data, function (element) {
         if (NGN.hasOwnProperty('DOM')) {
@@ -266,8 +266,19 @@ if (!NGN) {
     adjustedRender (parent, element, position) {
       if (['beforebegin', 'afterbegin', 'afterend'].indexOf(position.trim().toLowerCase()) < 0) {
         parent.appendChild(element)
+        NGN.BUS.emit('DOM.element.created', element)
       } else {
         parent.insertAdjacentHTML(position, element.outerHTML)
+        switch (position) {
+          case 'beforebegin':
+            return NGN.BUS.emit('template.render', parent.previousSibling)
+          case 'afterend':
+            return NGN.BUS.emit('template.render', parent.nextSibling)
+          case 'afterbegin':
+            return NGN.BUS.emit('template.render', parent.firstChild)
+          default:
+            return NGN.BUS.emit('template.render', parent.lastChild)
+        }
       }
     }
 
