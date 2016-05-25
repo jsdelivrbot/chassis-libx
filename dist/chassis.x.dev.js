@@ -1,5 +1,5 @@
 /**
-  * v1.0.17 generated on: Thu May 12 2016 17:44:02 GMT-0500 (CDT)
+  * v1.0.20 generated on: Wed May 25 2016 10:34:48 GMT-0500 (CDT)
   * Copyright (c) 2014-2016, Ecor Ventures LLC. All Rights Reserved. See LICENSE (BSD).
   */
 'use strict'
@@ -57,7 +57,7 @@ if (!NGN) {
          * 1. Driver.ref.key or Driver.dom.key
          *
          * ```js
-         * var Driver = new NGNX.Driver({
+         * let Driver = new NGNX.Driver({
          *   references: {
          *   	 buttons: 'body > button',
          *   	 nav: 'body > header > nav:first-of-type',
@@ -87,17 +87,17 @@ if (!NGN) {
          * An object of NGN.DATA.Store references to associate with the driver.
          *
          * ```js
-         * var MyStore = new NGN.DATA.Store({
+         * let MyStore = new NGN.DATA.Store({
          *   model: MyModel,
          *   allowDuplicates: false
          * })
          *
-         * var MyOtherStore = new NGN.DATA.Store({
+         * let MyOtherStore = new NGN.DATA.Store({
          *   model: MyOtherModel,
          *   allowDuplicates: false
          * })
          *
-         * var Driver = new NGNX.Driver({
+         * let Driver = new NGNX.Driver({
          *   datastores: {
          *   	 a: MyStore,
          *   	 b: MyOtherStore
@@ -107,6 +107,9 @@ if (!NGN) {
          * console.log(Driver.store.a.records) // dumps the records for MyModel
          * console.log(Driver.store.b.records) // dumps the records for MyOtherModel
          * ```
+         * Setting store references will also trigger specially scoped events,
+         * making it simpler to pinpoint modifications to a specific store.
+         * See #scopeStoreEvents for details.
          * @type {Object}
          */
         datastores: NGN.define(true, false, false, cfg.stores || {}),
@@ -123,7 +126,7 @@ if (!NGN) {
          * A named reference to NGN.HTTP templates. For example:
          *
          * ```js
-         * var Driver = new NGNX.Driver({
+         * let Driver = new NGNX.Driver({
          *   templates: {
          *     myview: './views/templates/myview.html',
          *     other: './views/templates/other.html'
@@ -240,7 +243,7 @@ if (!NGN) {
       }
       // If the parent is a selector, reference the element.
       if (typeof parent === 'string') {
-        var p = parent
+        let p = parent
         parent = document.querySelector(parent)
         if (parent === null) {
           console.warn(p + ' is not a valid selector or the referenced parent DOM element could not be found.')
@@ -248,13 +251,24 @@ if (!NGN) {
         }
       }
       position = position || 'beforeend'
+      let me = this
       NGN.HTTP.template(this.templates[name], data, function (element) {
-        if (['beforebegin', 'afterbegin', 'afterend'].indexOf(position.trim().toLowerCase()) < 0) {
-          parent.appendChild(element)
+        if (NGN.hasOwnProperty('DOM')) {
+          NGN.DOM.svg.update(element, function () {
+            me.adjustedRender(parent, element, position)
+          })
         } else {
-          parent.insertAdjacentHTML(position, element.outerHTML)
+          me.adjustedRender(parent, element, position)
         }
       })
+    }
+
+    adjustedRender (parent, element, position) {
+      if (['beforebegin', 'afterbegin', 'afterend'].indexOf(position.trim().toLowerCase()) < 0) {
+        parent.appendChild(element)
+      } else {
+        parent.insertAdjacentHTML(position, element.outerHTML)
+      }
     }
 
     /**
@@ -295,7 +309,48 @@ if (!NGN) {
 
     /**
      * @method scopeStoreEvents
-     * Apply the #scope prefix to each datastore event.
+     * Apply the #scope prefix to each datastore event. In addition to
+     * prefixing with the scope, a separate event will be prefixed with both
+     * the scope and name of the store reference. This is a convenience event.
+     *
+     * For example:
+     *
+     * ```js
+     * let MyStore = new NGN.DATA.Store({
+     *   model: MyModel,
+     *   allowDuplicates: false
+     * })
+     *
+     * let MyOtherStore = new NGN.DATA.Store({
+     *   model: MyOtherModel,
+     *   allowDuplicates: false
+     * })
+     *
+     * let Driver = new NGNX.Driver({
+     *   scope: 'myscope.', // <--- Notice the Driver scope!
+     *   datastores: {
+     *   	 a: MyStore, // <-- "a" is the store reference name for MyStore
+     *   	 b: MyOtherStore // <-- "b" is the store reference name for MyOtherStore
+     *   }
+     * })
+     *
+     * // Listen for record creation on ALL stores the Driver references.
+     * // In this case, adding a record to `MyStore` (a) or `MyOtherStore` (b)
+     * // will both trigger this event handler.
+     * NGN.BUS.on('myscope.record.create', function (record) {
+     *   console.log(record.data)
+     * })
+     *
+     * // Listen for record creation ONLY ON `MyStore`. Notice the event pattern:
+     * // `{scope}.{storeReferenceName}.record.create`.
+     * NGN.BUS.on('myscope.a.record.create', funciton (record) {
+     *   console.log(record.data)
+     * })
+     * ```
+     *
+     * If you use an alternative delimiter/separator to define your events, the
+     * Driver will recognize common ones, including a space, `-`, `.`, `_`, `+`,
+     * ':', or `;`.
      * @param {String} name
      * The Driver reference name to the store.
      * @param {boolean} suppressWarning
@@ -309,6 +364,12 @@ if (!NGN) {
         this.dataevents.forEach(function (e) {
           me.datastores[name].on(e, function (model) {
             NGN.BUS.emit(me.scope + e, model)
+            if ([' ', '-', '.', '_', '+', ':'].indexOf(me.scope.substr(me.scope.length - 1, 1)) >= 0) {
+              let sep = me.scope.substr(me.scope.length - 1, 1)
+              NGN.BUS.emit(me.scope + name + sep + e, model)
+            } else {
+              NGN.BUS.emit(me.scope + name + e, model)
+            }
           })
         })
       } else if (!suppress) {
@@ -417,7 +478,7 @@ if (!NGN) {
         data = extra
         extra = ''
       }
-      var scope = (this.scope + extra).trim()
+      let scope = (this.scope + extra).trim()
       scope = scope.length > 0 ? scope : null
       NGN.BUS.pool(scope, data)
     }
