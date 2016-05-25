@@ -262,7 +262,8 @@ if (!NGN) {
     adjustedRender (parent, element, position) {
       if (['beforebegin', 'afterbegin', 'afterend'].indexOf(position.trim().toLowerCase()) < 0) {
         parent.appendChild(element)
-        NGN.BUS.emit('DOM.element.created', element)
+        NGN.BUS.emit(this.scope + 'template.render', element)
+        NGN.BUS.emit('template.render', element)
       } else {
         parent.insertAdjacentHTML(position, element.outerHTML)
         switch (position) {
