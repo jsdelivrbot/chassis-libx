@@ -1,5 +1,5 @@
 /**
-  * v1.0.21 generated on: Wed May 25 2016 12:23:34 GMT-0500 (CDT)
+  * v1.0.22 generated on: Wed May 25 2016 12:26:58 GMT-0500 (CDT)
   * Copyright (c) 2014-2016, Ecor Ventures LLC. All Rights Reserved. See LICENSE (BSD).
   */
 'use strict'
@@ -271,12 +271,16 @@ if (!NGN) {
         parent.insertAdjacentHTML(position, element.outerHTML)
         switch (position) {
           case 'beforebegin':
+            NGN.BUS.emit(this.scope + 'template.render', parent.previousSibling)
             return NGN.BUS.emit('template.render', parent.previousSibling)
           case 'afterend':
+            NGN.BUS.emit(this.scope + 'template.render', parent.nextSibling)
             return NGN.BUS.emit('template.render', parent.nextSibling)
           case 'afterbegin':
+            NGN.BUS.emit(this.scope + 'template.render', parent.firstChild)
             return NGN.BUS.emit('template.render', parent.firstChild)
           default:
+            NGN.BUS.emit(this.scope + 'template.render', parent.lastChild)
             return NGN.BUS.emit('template.render', parent.lastChild)
         }
       }

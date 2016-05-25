@@ -267,12 +267,16 @@ if (!NGN) {
         parent.insertAdjacentHTML(position, element.outerHTML)
         switch (position) {
           case 'beforebegin':
+            NGN.BUS.emit(this.scope + 'template.render', parent.previousSibling)
             return NGN.BUS.emit('template.render', parent.previousSibling)
           case 'afterend':
+            NGN.BUS.emit(this.scope + 'template.render', parent.nextSibling)
             return NGN.BUS.emit('template.render', parent.nextSibling)
           case 'afterbegin':
+            NGN.BUS.emit(this.scope + 'template.render', parent.firstChild)
             return NGN.BUS.emit('template.render', parent.firstChild)
           default:
+            NGN.BUS.emit(this.scope + 'template.render', parent.lastChild)
             return NGN.BUS.emit('template.render', parent.lastChild)
         }
       }
