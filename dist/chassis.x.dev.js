@@ -1,5 +1,5 @@
 /**
-  * v1.0.23 generated on: Wed May 25 2016 13:31:46 GMT-0500 (CDT)
+  * v1.0.24 generated on: Sun May 29 2016 20:59:01 GMT-0500 (CDT)
   * Copyright (c) 2014-2016, Ecor Ventures LLC. All Rights Reserved. See LICENSE (BSD).
   */
 'use strict'
@@ -170,7 +170,9 @@ if (!NGN) {
           'index.create',
           'index.delete',
           'record.duplicate',
-          'record.update'
+          'record.update',
+          'filter.create',
+          'filter.remove'
         ])
       })
 

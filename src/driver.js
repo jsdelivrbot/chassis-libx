@@ -166,7 +166,9 @@ if (!NGN) {
           'index.create',
           'index.delete',
           'record.duplicate',
-          'record.update'
+          'record.update',
+          'filter.create',
+          'filter.remove'
         ])
       })
 
