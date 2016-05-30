@@ -1,5 +1,5 @@
 /**
-  * v1.0.24 generated on: Sun May 29 2016 20:59:01 GMT-0500 (CDT)
+  * v1.0.24 generated on: Sun May 29 2016 20:59:13 GMT-0500 (CDT)
   * Copyright (c) 2014-2016, Ecor Ventures LLC. All Rights Reserved. See LICENSE (BSD).
   */
 'use strict'
