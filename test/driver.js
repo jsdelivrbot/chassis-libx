@@ -13,7 +13,7 @@ test('NGNX.Driver', function (t) {
   })
 
   var MyController = new NGNX.Driver({
-    scope: 'test.',
+    namespace: 'test.',
     references: {
       test: '#test1'
     },

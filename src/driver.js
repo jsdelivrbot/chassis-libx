@@ -31,12 +31,12 @@ if (!NGN) {
 
       Object.defineProperties(this, {
         /**
-         * @cfg {string} [scope]
-         * The scope is prepended to NGN.BUS events. For example, setting
+         * @cfg {string} [namespace]
+         * The namespace is prepended to NGN.BUS events. For example, setting
          * this to `mydriver.` will trigger events like
          * `mydriver.eventname` instead of just `eventname`.
          */
-        scope: NGN.define(true, false, false, cfg.scope || null),
+        scope: NGN.define(true, false, false, cfg.namespace || null),
 
         /**
          * @cfg {Object} [references]
@@ -103,7 +103,7 @@ if (!NGN) {
          * console.log(Driver.store.a.records) // dumps the records for MyModel
          * console.log(Driver.store.b.records) // dumps the records for MyOtherModel
          * ```
-         * Setting store references will also trigger specially scoped events,
+         * Setting store references will also trigger specially namespaced events,
          * making it simpler to pinpoint modifications to a specific store.
          * See #scopeStoreEvents for details.
          * @type {Object}
@@ -310,7 +310,7 @@ if (!NGN) {
       let me = this
       if (this.datastores.hasOwnProperty(name)) {
         if (this.scope !== null) {
-          // Remove scoped events.
+          // Remove namespaced events.
           this.dataevents.forEach(function (e) {
             NGN.BUS.off(me.scope + e)
           })
@@ -323,9 +323,9 @@ if (!NGN) {
 
     /**
      * @method scopeStoreEvents
-     * Apply the #scope prefix to each datastore event. In addition to
-     * prefixing with the scope, a separate event will be prefixed with both
-     * the scope and name of the store reference. This is a convenience event.
+     * Apply the #namespace prefix to each datastore event. In addition to
+     * prefixing with the namespace/scope, a separate event will be prefixed with both
+     * the namespace and name of the store reference. This is a convenience event.
      *
      * For example:
      *
@@ -341,7 +341,7 @@ if (!NGN) {
      * })
      *
      * let Driver = new NGNX.Driver({
-     *   scope: 'myscope.', // <--- Notice the Driver scope!
+     *   namespace: 'myscope.', // <--- Notice the Driver scope!
      *   datastores: {
      *   	 a: MyStore, // <-- "a" is the store reference name for MyStore
      *   	 b: MyOtherStore // <-- "b" is the store reference name for MyOtherStore
@@ -368,7 +368,7 @@ if (!NGN) {
      * @param {String} name
      * The Driver reference name to the store.
      * @param {boolean} suppressWarning
-     * Suppress the warning message if the scope is not defined.
+     * Suppress the warning message if the namespace is not defined.
      * @private
      */
     scopeStoreEvents (name, suppress) {
@@ -387,7 +387,7 @@ if (!NGN) {
           })
         })
       } else if (!suppress) {
-        console.warn('Driver.scopeStoreEvents called without a defined scope.')
+        console.warn('Driver.scopeStoreEvents called without a defined namespace.')
       }
     }
 
@@ -438,13 +438,13 @@ if (!NGN) {
     /**
      * @method pool
      * A shortcut method to create an NGN.BUS.pool. This method will automatically
-     * apply the #scope prefix to the pool. It is possible to create multiple pools
-     * by using an "extra" scope.
+     * apply the #namespace prefix to the pool. It is possible to create multiple pools
+     * by using an "extra" namespace.
      *
      * **Example**
      * ```js
      * let MyDriver = new NGNX.Driver({
-     *   scope: 'myprefix.'
+     *   namespace: 'myprefix.'
      * })
      *
      * MyDriver.pool('extra.', {
@@ -460,12 +460,12 @@ if (!NGN) {
      * })
      * ```
      *
-     * If "extra" scope isn't necessary, it will still apply the #scope to events
+     * If "extra" namespace isn't necessary, it will still apply the #namespace to events
      * in order to associate the events with this store.
      *
      * ```js
      * let MyDriver = new NGNX.Driver({
-     *   scope: 'myprefix.'
+     *   namespace: 'myprefix.'
      * })
      *
      * MyDriver.pool({
@@ -481,8 +481,8 @@ if (!NGN) {
      *
      * While this is a simple abstraction, it offers a code organization benefit.
      * Drivers can encapsulate BUS event logic in one place using a driver.
-     * @param {string} [extrascope]
-     * An extra scope to add to event listeners.
+     * @param {string} [extranamespace]
+     * An extra namespace to add to event listeners.
      * @param {object} handlers
      * An object containing event listeners. See NGN.BUS.pool for syntax and
      * examples.
@@ -499,12 +499,12 @@ if (!NGN) {
 
     /**
      * @method emit
-     * This is a shortcut to NGN.BUS.emit, but it adds the #scope to the event.
+     * This is a shortcut to NGN.BUS.emit, but it adds the #namespace to the event.
      *
      * **Example**:
      * ```js
      * let MyDriver = new NGNX.Driver({
-     *   scope: 'myprefix.'
+     *   namespace: 'myprefix.'
      * })
      *
      * MyDriver.emit('some.event') // <--- Emit event
@@ -517,10 +517,10 @@ if (!NGN) {
      * NGN.BUS.emit('prefix.some.event')
      * ```
      *
-     * The "value-add" of this method is prepending the scope automatically.
+     * The "value-add" of this method is prepending the namespace automatically.
      * It also supports payloads (just like NGN.BUS.emit).
      * @param {string} eventName
-     * The name of the event to trigger (with the #scope prefixed to it).
+     * The name of the event to trigger (with the #namespace prefixed to it).
      * @param {object|string|number|boolean|array} payload
      * An object to send to the event handler.
      */
