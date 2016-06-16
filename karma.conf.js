@@ -34,7 +34,7 @@ module.exports = function (config) {
         }
         break
       // case 'firefox':
-      //   for (i = (version - 1); i <= version; i++) {
+      //   for (i = 43; i <= version; i++) {
       //     customLaunchers['cl_firefox_' + i.toString()] = {
       //       base: 'SauceLabs',
       //       browserName: 'firefox',
@@ -110,7 +110,18 @@ module.exports = function (config) {
   }
 
   config.set({
-    browserNoActivityTimeout: 100000,
+    browserDisconnectTimeout: 300000,
+    browserDisconnectTolerance: 10,
+    browserNoActivityTimeout: 300000,
+
+    specReporter: {
+      maxLogLines: 5,         // limit number of lines logged per test
+      suppressErrorSummary: true,  // do not print error summary
+      suppressFailed: false,  // do not print information about failed tests
+      suppressPassed: true,  // do not print information about passed tests
+      suppressSkipped: true,  // do not print information about skipped tests
+      showSpecTiming: false // print the time elapsed for each spec
+    },
 
     sauceLabs: {
       testName: 'NGNX Chassis JS Lib Unit Tests',
@@ -149,6 +160,7 @@ module.exports = function (config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'https://cdn.jsdelivr.net/chassis/latest/chassis.min.js',
       'dist/chassis.x.min.js',
       'test/*.js'
     ],
@@ -164,7 +176,7 @@ module.exports = function (config) {
     },
 
     browserify: {
-      debug: true
+      debug: false
     },
 
     // test results reporter to use
@@ -180,7 +192,7 @@ module.exports = function (config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_DEBUG,
+    logLevel: config.LOG_WARN,
 
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
@@ -196,6 +208,6 @@ module.exports = function (config) {
 
     // Concurrency level
     // how many browser should be started simultanous
-    concurrency: 1
+    concurrency: 3
   })
 }

@@ -15,7 +15,7 @@ var getFiles = function () {
     var cli = JSON.parse(process.env.npm_config_argv)
     if (cli.original && cli.original.length > 1 && cli.original[1] === 'localtest') {
       return [
-        'https://cdn.jsdelivr.net/chassis/1.0.34/chassis.min.js',
+        'https://cdn.jsdelivr.net/chassis/latest/chassis.min.js',
         'dist/chassis.x.min.js',
         'test/*.js',
         'test/test.html'
@@ -23,7 +23,7 @@ var getFiles = function () {
     }
   }
   return [
-    'https://cdn.jsdelivr.net/chassis/1.0.34/chassis.min.js',
+    'https://cdn.jsdelivr.net/chassis/latest/chassis.min.js',
     'src/data/httpproxy.js',
     'src/driver.js',
     'src/loader.js',
