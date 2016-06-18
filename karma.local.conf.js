@@ -42,6 +42,15 @@ module.exports = function (config) {
       recordScreenshots: true
     },
 
+    specReporter: {
+      maxLogLines: 5,         // limit number of lines logged per test
+      suppressErrorSummary: false,  // do not print error summary
+      suppressFailed: false,  // do not print information about failed tests
+      suppressPassed: true,  // do not print information about passed tests
+      suppressSkipped: true,  // do not print information about skipped tests
+      showSpecTiming: false // print the time elapsed for each spec
+    },
+
     plugins: [
       require('karma-browserify'),
       require('tape'),
@@ -76,7 +85,7 @@ module.exports = function (config) {
     },
 
     browserify: {
-      debug: true
+      debug: false
     },
 
     // test results reporter to use
@@ -92,7 +101,7 @@ module.exports = function (config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_ERROR,
 
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,

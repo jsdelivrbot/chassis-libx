@@ -534,7 +534,8 @@ if (!NGN) {
      * An object to send to the event handler.
      */
     emit (eventName, payload) {
-      NGN.BUS.emit(this.scope + eventName, payload)
+      arguments[0] = this.scope + arguments[0]
+      NGN.BUS.emit.apply(NGN.BUS, arguments)
     }
   }
   NGNX.Driver = _Driver
