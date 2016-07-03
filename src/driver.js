@@ -177,7 +177,6 @@ if (!NGN) {
       // Generate references
       Object.keys(this.references).forEach(function (r) {
         if (NGN.ref[r] === undefined || NGN.ref[r] === null) {
-          console.log('YO', r, me.references[r])
           NGN.ref.create(r, me.references[r])
         }
       })
@@ -235,6 +234,7 @@ if (!NGN) {
         console.warn('The data provided to the renderer could not be processed because it is not a key/value object.', data)
         return
       }
+
       // If the parent is a function, treat it as a callback
       if (typeof parent === 'function') {
         NGN.NET.template(this.templates[name], data, parent)
@@ -251,7 +251,9 @@ if (!NGN) {
       }
       position = (position || 'beforeend').toLowerCase()
       let me = this
+console.log('RENDER');
       NGN.NET.template(this.templates[name], data, function (element) {
+console.log('RENDER2');
         if (NGN.hasOwnProperty('DOM')) {
           NGN.DOM.svg.update(element, function () {
             me.adjustedRender(parent, element, position, callback)

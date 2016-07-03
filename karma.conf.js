@@ -155,7 +155,7 @@ var getFiles = function () {
   allfiles = allfiles.concat(files)
   allfiles.push('test/*.js')
   allfiles.push('test/test.html')
-console.log(allfiles)
+
   return allfiles
 }
 
