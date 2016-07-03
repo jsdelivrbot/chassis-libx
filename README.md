@@ -1,4 +1,4 @@
-# NGNX Chassis library [![GitHub version](https://badge.fury.io/gh/ngnjs%2Fchassis-libx.svg)](https://badge.fury.io/gh/ngnjs%2Fchassis-libx) [![Build Status](https://travis-ci.org/ngnjs/chassis-libx.svg?branch=master)](https://travis-ci.org/ngnjs/chassis-libx)
+# NGNX Chassis library [![GitHub version](https://badge.fury.io/gh/ngnjs%2Fchassis-libx.svg)](https://badge.fury.io/gh/ngnjs%2Fchassis-libx) [![Build Status](https://semaphoreci.com/api/v1/ngn/chassis-libx/branches/master/badge.svg)](https://semaphoreci.com/ngn/chassis-libx)
 
 The NGNX Chassis JS library extends the [NGN](http://ngn.js.org) platform. It
 consists of opinionated building blocks that are of use but do not fit the
