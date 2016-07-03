@@ -31,7 +31,7 @@ if (!window.NGN.BUS) {
   console.warn('State management is inactive because NGN.BUS was not found.')
 } else {
   window.NGNX = window.NGNX || {}
-  NGN._od(NGNX, 'statechangerecorded', false, true, false, false)
+  Object.defineProperty(NGNX, 'statechangerecorded', NGN.public(false))
   NGN.BUS.on('state.change', function (visible) {
     NGN.BUS.emit('state.' + (visible ? 'visible' : 'hidden'))
   })

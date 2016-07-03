@@ -3,15 +3,17 @@
 var test = require('tape')
 
 test('NGNX.Driver', function (t) {
+  console.log('BP1')
   var Model = new NGN.DATA.Model({
     fields: {
       test: null
     }
   })
+  console.log('BP2')
   var Models = new NGN.DATA.Store({
     model: Model
   })
-
+console.log('BP3')
   var MyController = new NGNX.Driver({
     namespace: 'test.',
     references: {
@@ -24,10 +26,12 @@ test('NGNX.Driver', function (t) {
       test: './test/test.html'
     }
   })
-
+  console.log(document.getElementById('test1'))
+console.log('BP4')
   t.ok(NGN.ref.test !== undefined, 'Reference created.')
+console.log('BP4.5')
   t.ok(MyController.store.hasOwnProperty('mystore'), 'Store registered successfully.')
-
+console.log('BP5')
   NGN.BUS.on('test.record.create', function (record) {
     t.pass('Scoped event bubbling successfully triggered on NGN.BUS.')
     t.ok(record.test === 'test', 'Data update recognized.')

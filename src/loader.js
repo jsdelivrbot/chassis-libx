@@ -5,8 +5,8 @@ if (!NGN) {
 } else {
   if (!window.NGN.BUS) {
     console.warn('NGNX.Loader is not available because NGN.BUS was not found.')
-  } else if (!NGN.HTTP) {
-    console.warn('NGNX.Loader is not available because NGN.HTTP was not found.')
+  } else if (!NGN.NET) {
+    console.warn('NGNX.Loader is not available because NGN.NET was not found.')
   } else {
     window.NGNX = window.NGNX || {}
 
@@ -108,7 +108,7 @@ if (!NGN) {
 
       // Synchronous file loader
       var loadSync = function (files) {
-        NGN.HTTP.import(files.shift(), function () {
+        NGN.NET.import(files.shift(), function () {
           if (files.length > 0) {
             loadSync(files)
           }
@@ -122,7 +122,7 @@ if (!NGN) {
 
       // Load asynchronous files
       if (this.async.length > 0) {
-        NGN.HTTP.import(this.async, function (imported) {
+        NGN.NET.import(this.async, function (imported) {
           // Force a slight delay to assure everything is loaded.
           setTimeout(function () {
             if (typeof callback === 'function') {

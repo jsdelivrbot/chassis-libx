@@ -36,7 +36,7 @@ if (!NGN) {
          * this to `mydriver.` will trigger events like
          * `mydriver.eventname` instead of just `eventname`.
          */
-        scope: NGN.define(true, false, false, cfg.namespace || null),
+        scope: NGN.const(cfg.namespace || null),
 
         /**
          * @cfg {Object} [references]
@@ -76,7 +76,7 @@ if (!NGN) {
          * be overridden. Instead, a `getter`/pointer to the original reference
          * will be created and a warning will be displayed in the console.
          */
-        references: NGN.define(false, false, false, cfg.references || {}),
+        references: NGN.privateconst(cfg.references || {}),
 
         /**
          * @cfgproperty {Object} [stores]
@@ -108,18 +108,18 @@ if (!NGN) {
          * See #scopeStoreEvents for details.
          * @type {Object}
          */
-        datastores: NGN.define(true, false, false, cfg.stores || {}),
+        datastores: NGN.const(cfg.stores || {}),
 
         /**
          * @property {Array} events
          * Contains a list of events that can be triggered by this driver.
          * @private
          */
-        events: NGN.define(false, true, false, []),
+        events: NGN.private([]),
 
         /**
          * @cfg {Object} templates
-         * A named reference to NGN.HTTP templates. For example:
+         * A named reference to NGN.NET templates. For example:
          *
          * ```js
          * let Driver = new NGNX.Driver({
@@ -142,7 +142,7 @@ if (!NGN) {
          * The last few lines of code are the equivalent of:
          *
          * ```js
-         * NGN.HTTP.template('./views/templates/myview.html', data, function (el) {
+         * NGN.NET.template('./views/templates/myview.html', data, function (el) {
          *   document.appendChild(el)
          * })
          * ```
@@ -153,14 +153,14 @@ if (!NGN) {
          * Driver initiates the download. It also allows different drivers to
          * handle the response in a different manner.
          */
-        templates: NGN.define(false, false, false, cfg.templates || {}),
+        templates: NGN.privateconst(cfg.templates || {}),
 
         /**
          * @property {Array} dataevents
          * The supported data events.
          * @hidden
          */
-        dataevents: NGN.define(false, false, false, [
+        dataevents: NGN.privateconst([
           'record.create',
           'record.delete',
           'index.create',
@@ -177,6 +177,7 @@ if (!NGN) {
       // Generate references
       Object.keys(this.references).forEach(function (r) {
         if (NGN.ref[r] === undefined || NGN.ref[r] === null) {
+          console.log('YO', r, me.references[r])
           NGN.ref.create(r, me.references[r])
         }
       })
@@ -210,7 +211,7 @@ if (!NGN) {
      * @param {string} name
      * The name of the template provided in #templates.
      * @param {object} data
-     * The key/value object passed to the NGN.HTTP.template method.
+     * The key/value object passed to the NGN.NET.template method.
      * @param {HTMLElement|String} [parent]
      * The parent element or a selector reference to the parent element
      * in which the template code is injected.
@@ -236,7 +237,7 @@ if (!NGN) {
       }
       // If the parent is a function, treat it as a callback
       if (typeof parent === 'function') {
-        NGN.HTTP.template(this.templates[name], data, parent)
+        NGN.NET.template(this.templates[name], data, parent)
         return
       }
       // If the parent is a selector, reference the element.
@@ -250,7 +251,7 @@ if (!NGN) {
       }
       position = (position || 'beforeend').toLowerCase()
       let me = this
-      NGN.HTTP.template(this.templates[name], data, function (element) {
+      NGN.NET.template(this.templates[name], data, function (element) {
         if (NGN.hasOwnProperty('DOM')) {
           NGN.DOM.svg.update(element, function () {
             me.adjustedRender(parent, element, position, callback)

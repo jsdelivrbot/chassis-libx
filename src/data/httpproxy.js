@@ -8,7 +8,7 @@ window.NGNX.DATA = window.NGNX.DATA || {}
  * Provides a gateway to a remote HTTP/S endpoint.
  * @extends NGN.DATA.Proxy
  */
-if (NGN.DATA.Proxy && NGN.HTTP) {
+if (NGN.DATA.Proxy && NGN.NET) {
   window.NGNX.DATA.HttpProxy = function (cfg) {
     cfg = cfg || {}
 
@@ -87,16 +87,16 @@ if (NGN.DATA.Proxy && NGN.HTTP) {
 
         this.actions.create.forEach(function (model) {
           req.json = model.data
-          NGN.HTTP.post(req, increment('create', model))
+          NGN.NET.post(req, increment('create', model))
         })
         this.actions.update.forEach(function (model) {
           req.url += '/' + model.id
           req.json = model.data
-          NGN.HTTP.put(req, increment('update', model))
+          NGN.NET.put(req, increment('update', model))
         })
         this.actions.delete.forEach(function (model) {
           req.url += '/' + model.id
-          NGN.HTTP.delete(req, increment('delete', model))
+          NGN.NET.delete(req, increment('delete', model))
         })
       }),
 
@@ -113,7 +113,7 @@ if (NGN.DATA.Proxy && NGN.HTTP) {
       fetch: NGN.define(true, false, false, function (path, callback) {
         var req = this.options
         req.url += (path || '')
-        NGN.HTTP.get(req, function (res) {
+        NGN.NET.get(req, function (res) {
           var data = res.responseText
           if (typeof data === 'string') {
             data = JSON.parse(data)
@@ -126,7 +126,7 @@ if (NGN.DATA.Proxy && NGN.HTTP) {
       })
     })
   }
-  NGN.DATA.util.inherit(NGN.DATA.Proxy, NGNX.DATA.HttpProxy)
+  NGN.inherit(NGN.DATA.Proxy, NGNX.DATA.HttpProxy)
 } else {
-  throw new Error('NGN.DATA.Proxy & NGN.HTTP are required for NGN.DATA.HttpProxy.')
+  throw new Error('NGN.DATA.Proxy & NGN.NET are required for NGN.DATA.HttpProxy.')
 }
