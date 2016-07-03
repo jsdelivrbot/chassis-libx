@@ -5,6 +5,7 @@ const gulp = require('gulp')
 const concat = require('gulp-concat')
 const uglify = require('gulp-uglify')
 const babel = require('gulp-babel')
+const cp = require('child_process')
 const header = require('gulp-header')
 const del = require('del')
 const MustHave = require('musthave')
@@ -52,10 +53,10 @@ gulp.task('clean', function (next) {
 })
 
 const common = [
-  'src/data/httpproxy.js',
-  'src/driver.js',
-  'src/loader.js',
-  'src/state.js'
+  'data/httpproxy.js',
+  'driver.js',
+  'loader.js',
+  'state.js'
 ]
 
 const minifyConfig = {
@@ -105,7 +106,7 @@ gulp.task('generate', function () {
   common.forEach(function (filename) {
     console.log('Generating common file:', filename)
     gulp.src(path.join(DIR.source, filename))
-      .pipe(concat(filename.replace('.js', '.min.js')))
+      .pipe(concat(filename.replace('.js', '.min.js').replace(path.sep, '.')))
       .pipe(babel(babelConfig))
       .pipe(uglify(minifyConfig))
       .pipe(header(headerComment))
@@ -126,65 +127,96 @@ gulp.task('generate', function () {
   .pipe(gulp.dest(DIR.dist))
 })
 
-gulp.task('release', function (next) {
-  if (!mh.hasAll(process.env, 'GITHUB_TOKEN', 'GITHUB_ACCOUNT', 'GITHUB_REPO')) {
-    throw new Error('Release not possible. Missing data: ' + mh.missing.join(', '))
-  }
+gulp.task('prereleasecheck', function (next) {
+  console.log('Checking if package already exists.')
+  const child = cp.spawn('npm', ['info', pkg.name])
 
-  // Check if the release already exists.
-  const https = require('https')
-
-  https.get({
-    hostname: 'api.github.com',
-    path: '/repos/' + process.env.process.env.GITHUB_ACCOUNT + '/' + process.env.GITHUB_REPO + '/releases',
-    headers: {
-      'user-agent': 'Release Checker'
+  let data = ""
+  child.stdout.on('data', function (chunk) {
+    data += chunk.toString()
+  })
+  child.on('close', function () {
+    const re = new RegExp('latest: \'' + pkg.version + '\'')
+    if (re.exec(data) === null) {
+      next()
+    } else {
+      console.log('The version has not changed (' + pkg.version + '). A new release is unnecessary. Aborting deployment with success code.')
+      process.exit(0)
     }
-  }, function (res) {
-    let data = ""
-    res.on('data', function (chunk) {
-      data += chunk
-    })
+  })
+})
 
-    res.on('error', function (err) {
-      throw err
-    })
+gulp.task('release', function (next) {
+  console.log('Checking if package already exists.')
+  const child = cp.spawn('npm', ['info', pkg.name])
 
-    res.on('end', function () {
-      data = JSON.parse(data).filter(function (release) {
-        return release.tag_name === pkg.version
-      })
-
-      if (data.length > 0) {
-        console.log('Release ' + pkg.version + ' already exists. Aboting without error.')
-        process.exit(0)
+  let data = ""
+  child.stdout.on('data', function (chunk) {
+    data += chunk.toString()
+  })
+  child.on('close', function () {
+    const re = new RegExp('latest: \'' + pkg.version + '\'')
+    if (re.exec(data) === null) {
+      if (!mh.hasAll(process.env, 'GITHUB_TOKEN', 'GITHUB_ACCOUNT', 'GITHUB_REPO')) {
+        throw new Error('Release not possible. Missing data: ' + mh.missing.join(', '))
       }
-      
-      const assets = walk(DIR.dist).sort()
 
-      GithubPublisher({
-        token: process.env.GITHUB_TOKEN,
-        owner: process.env.GITHUB_ACCOUNT,
-        repo: process.env.GITHUB_REPO,
-        tag: pkg.version,
-        name: pkg.version,
-        notes: 'Releasing v' + pkg.version,
-        draft: false,
-        prerelease: false,
-        reuseRelease: true,
-        reuseDraftOnly: true,
-        assets: assets,
-        // apiUrl: 'https://myGHEserver/api/v3',
-        target_commitish: 'master'
-      }, function (err, release) {
-        if (err) {
-          err.errors.forEach(function (e) {
-            console.error((e.resource + ' ' + e.code).red.bold)
-          })
-          process.exit(1)
+      // Check if the release already exists.
+      const https = require('https')
+
+      https.get({
+        hostname: 'api.github.com',
+        path: '/repos/' + process.env.GITHUB_ACCOUNT + '/' + process.env.GITHUB_REPO + '/releases',
+        headers: {
+          'user-agent': 'Release Checker'
         }
-        console.log(release)
+      }, function (res) {
+        let data = ""
+        res.on('data', function (chunk) {
+          data += chunk
+        })
+
+        res.on('error', function (err) {
+          throw err
+        })
+
+        res.on('end', function () {
+          data = JSON.parse(data).filter(function (release) {
+            return release.tag_name === pkg.version
+          })
+
+          if (data.length > 0) {
+            console.log('Release ' + pkg.version + ' already exists. Aboting without error.')
+            process.exit(0)
+          }
+
+          const assets = walk(DIR.dist).sort()
+
+          GithubPublisher({
+            token: process.env.GITHUB_TOKEN,
+            owner: process.env.GITHUB_ACCOUNT,
+            repo: process.env.GITHUB_REPO,
+            tag: pkg.version,
+            name: pkg.version,
+            notes: 'Releasing v' + pkg.version,
+            draft: false,
+            prerelease: false,
+            reuseRelease: true,
+            reuseDraftOnly: true,
+            assets: assets,
+            // apiUrl: 'https://myGHEserver/api/v3',
+            target_commitish: 'master'
+          }, function (err, release) {
+            if (err) {
+              err.errors.forEach(function (e) {
+                console.error((e.resource + ' ' + e.code).red.bold)
+              })
+              process.exit(1)
+            }
+            console.log(release)
+          })
+        })
       })
-    })
+    }
   })
 })

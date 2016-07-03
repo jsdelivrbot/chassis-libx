@@ -3,7 +3,7 @@
 if (!NGN) {
   console.error('NGN not found.')
 } else {
-  window.NGNX = window.NGNX || {}
+  NGN.global.NGNX = NGN.global.NGNX || {}
 
   /**
    * @class NGNX.Driver
@@ -25,7 +25,7 @@ if (!NGN) {
    * custom methods, properties, configurations, etc. For more details about
    * extending drivers, see the NGNX.Driver guide.
    */
-  class _Driver {
+  class Driver {
     constructor (cfg) {
       cfg = cfg || {}
 
@@ -172,7 +172,7 @@ if (!NGN) {
         ])
       })
 
-      let me = this
+      const me = this
 
       // Generate references
       Object.keys(this.references).forEach(function (r) {
@@ -251,9 +251,8 @@ if (!NGN) {
       }
       position = (position || 'beforeend').toLowerCase()
       let me = this
-console.log('RENDER');
+
       NGN.NET.template(this.templates[name], data, function (element) {
-console.log('RENDER2');
         if (NGN.hasOwnProperty('DOM')) {
           NGN.DOM.svg.update(element, function () {
             me.adjustedRender(parent, element, position, callback)
@@ -267,8 +266,7 @@ console.log('RENDER2');
     adjustedRender (parent, element, position, callback) {
       if (['beforebegin', 'afterbegin', 'afterend'].indexOf(position.trim().toLowerCase()) < 0) {
         parent.appendChild(element)
-        NGN.BUS.emit(this.scope + 'template.render', element)
-        NGN.BUS.emit('template.render', element)
+        this.templateRendered(element)
         if (callback) {
           callback()
         }
@@ -276,25 +274,26 @@ console.log('RENDER2');
         parent.insertAdjacentHTML(position, element.outerHTML)
         switch (position) {
           case 'beforebegin':
-            NGN.BUS.emit(this.scope + 'template.render', parent.previousSibling)
-            NGN.BUS.emit('template.render', parent.previousSibling)
+            this.templateRendered(parent.previousSibling)
             break
           case 'afterend':
-            NGN.BUS.emit(this.scope + 'template.render', parent.nextSibling)
-            NGN.BUS.emit('template.render', parent.nextSibling)
+            this.templateRendered(parent.nextSibling)
             break
           case 'afterbegin':
-            NGN.BUS.emit(this.scope + 'template.render', parent.firstChild)
-            NGN.BUS.emit('template.render', parent.firstChild)
+            this.templateRendered(parent.firstChild)
             break
           default:
-            NGN.BUS.emit(this.scope + 'template.render', parent.lastChild)
-            NGN.BUS.emit('template.render', parent.lastChild)
+            this.templateRendered(parent.lastChild)
         }
         if (callback) {
           callback()
         }
       }
+    }
+
+    templateRendered (element) {
+      NGN.BUS.emit(this.scope + 'template.render', element)
+      NGN.BUS.emit('template.render', element)
     }
 
     /**
@@ -319,7 +318,7 @@ console.log('RENDER2');
      * The store to reference.
      */
     addStore (name, store) {
-      let me = this
+      const me = this
       if (this.datastores.hasOwnProperty(name)) {
         if (this.scope !== null) {
           // Remove namespaced events.
@@ -386,7 +385,7 @@ console.log('RENDER2');
     scopeStoreEvents (name, suppress) {
       suppress = NGN.coalesce(suppress, false)
       if (this.scope !== null) {
-        let me = this
+        const me = this
         this.dataevents.forEach(function (e) {
           me.datastores[name].on(e, function (model) {
             NGN.BUS.emit(me.scope + e, model)
@@ -435,13 +434,14 @@ console.log('RENDER2');
      * @param {function} handler
      * The handler function that responds to the event.
      */
-    on (topic, handler) {
+    on () {
+      const topic = arguments[0]
       if (!NGN.BUS) {
         console.warn("NGNX.Driver.on('" + topic + "', ...) will not work because NGN.BUS is not available.")
         return
       }
       if (this.events.indexOf(topic) >= 0) {
-        NGN.BUS.on(topic, handler)
+        NGN.BUS.on.apply(NGN.BUS, arguments)
       } else {
         console.warn(topic + ' is not a supported event for this Driver.')
       }
@@ -536,10 +536,10 @@ console.log('RENDER2');
      * @param {object|string|number|boolean|array} payload
      * An object to send to the event handler.
      */
-    emit (eventName, payload) {
+    emit () {
       arguments[0] = this.scope + arguments[0]
       NGN.BUS.emit.apply(NGN.BUS, arguments)
     }
   }
-  NGNX.Driver = _Driver
+  NGNX.Driver = Driver
 }

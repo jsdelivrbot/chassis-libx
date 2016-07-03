@@ -55,8 +55,8 @@ test('NGNX.Driver', function (t) {
       t.pass('Driver event pooling triggered successfully.')
       NGN.BUS.once('test.scoped.event.received', function () {
         t.pass('Driver.emit() properly scopes an event on the NGN.BUS.')
-        MyController.render('test', {}, document.body)
-        //t.end()
+        // MyController.render('test', {}, document.body)
+        t.end()
       })
       MyController.emit('scoped.event.received')
     })
