@@ -163,10 +163,10 @@ if (!NGN) {
         dataevents: NGN.privateconst([
           'record.create',
           'record.delete',
-          'index.create',
-          'index.delete',
           'record.duplicate',
           'record.update',
+          'index.create',
+          'index.delete',
           'filter.create',
           'filter.remove'
         ])
@@ -386,15 +386,21 @@ if (!NGN) {
       suppress = NGN.coalesce(suppress, false)
       if (this.scope !== null) {
         const me = this
+        const sep = this.scope === null ? 'NONE' : this.scope.substr(this.scope.length - 1, 1)
         this.dataevents.forEach(function (e) {
-          me.datastores[name].on(e, function (model) {
-            NGN.BUS.emit(me.scope + e, model)
-            if ([' ', '-', '.', '_', '+', ':'].indexOf(me.scope.substr(me.scope.length - 1, 1)) >= 0) {
-              let sep = me.scope.substr(me.scope.length - 1, 1)
-              NGN.BUS.emit(me.scope + name + sep + e, model)
+          me.datastores[name].on(e, function () {
+            let args = NGN.slice(arguments)
+            args.unshift(me.scope + e)
+            NGN.BUS.emit.apply(NGN.BUS, args)
+            args.shift()
+
+            if ([' ', '-', '.', '_', '+', ':'].indexOf(sep) >= 0) {
+              args.unshift(me.scope + name + sep + e)
             } else {
-              NGN.BUS.emit(me.scope + name + e, model)
+              args.unshift(me.scope + name + e)
             }
+
+            NGN.BUS.emit.apply(NGN.BUS, args)
           })
         })
       } else if (!suppress) {
