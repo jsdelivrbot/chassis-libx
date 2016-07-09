@@ -387,12 +387,10 @@ if (!NGN) {
       if (this.scope !== null) {
         const me = this
         const sep = this.scope === null ? 'NONE' : this.scope.substr(this.scope.length - 1, 1)
+
         this.dataevents.forEach(function (e) {
           me.datastores[name].on(e, function () {
             let args = NGN.slice(arguments)
-            args.unshift(me.scope + e)
-            NGN.BUS.emit.apply(NGN.BUS, args)
-            args.shift()
 
             if ([' ', '-', '.', '_', '+', ':'].indexOf(sep) >= 0) {
               args.unshift(me.scope + name + sep + e)

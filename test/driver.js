@@ -33,7 +33,7 @@ test('NGNX.Driver', function (t) {
   t.ok(NGN.ref.test !== undefined, 'Reference created.')
   t.ok(MyController.store.hasOwnProperty('mystore'), 'Store registered successfully.')
 
-  NGN.BUS.on('test.record.create', function (record) {
+  NGN.BUS.on('test.mystore.record.create', function (record) {
     t.pass('Scoped event bubbling successfully triggered on NGN.BUS.')
     t.ok(record.test === 'test', 'Data update recognized.')
     // MyController.render('test', {}, function (el) {
