@@ -72,11 +72,43 @@ if (!NGN) {
          * })
          * ```
          *
-         * References are global. If a reference already exists, it will **not**
-         * be overridden. Instead, a `getter`/pointer to the original reference
-         * will be created and a warning will be displayed in the console.
+         * References are _tecnically_ global, so they are accessible via
+         * `NGN.ref`. However; practical use has proven there is little reason
+         * to access a Driver reference globally. The NGNX.Driver adds a scope
+         * (#id) to the reference name to prevent conflicts with other Drivers.
+         * This is handled by the driver, providing a simpler syntax. As a
+         * result, it is possible for each NGNX.Driver to have the same
+         * reference names, where each reference refers to a differnt DOM
+         * element. For example:
+         *
+         * ```js
+         * let DriverA = new NGNX.Driver({
+         *   references: {
+         *   	 button: 'body > button' // <-- Difference
+         *   }
+         * })
+         *
+         * let DriverB = new NGNX.Driver({
+         *   references: {
+         *   	 button: 'div > button' // <-- Difference
+         *   }
+         * })
+         *
+         * console.log(DriverA.button) // Outputs the `body > button` DOM element
+         * console.log(DriverB.button) // Outputs the `div > button` DOM element
+         * ```
+         *
+         * `DriverA.button` and `DriverB.button` both have a `button` reference,
+         * but each one refers to a different DOM element.
          */
         references: NGN.privateconst(cfg.references || {}),
+
+        /**
+         * @property {object} ref
+         * Access a DOM #reference.
+         * @readonly
+         */
+        ref: NGN.private({}),
 
         /**
          * @cfgproperty {Object} [stores]
@@ -165,26 +197,43 @@ if (!NGN) {
           'record.delete',
           'record.duplicate',
           'record.update',
+          'record.expired',
+          'record.restored',
+          'record.purged',
           'index.create',
           'index.delete',
           'filter.create',
           'filter.remove'
-        ])
+        ]),
+
+        /**
+         * @property {string} id
+         * A key to uniquely identify the driver. This is an auto-generated
+         * GUID, assigned in realtime.
+         * @private
+         */
+        id: NGN.privateconst(NGN.coalesce(cfg.namespace, NGN.DATA.util.GUID()).replace(/[^A-Za-z0-9]/gi, ''))
       })
 
-      const me = this
-
       // Generate references
-      Object.keys(this.references).forEach(function (r) {
+      Object.keys(this.references).forEach((r) => {
+        const originalName = r
+
+        r = this.id + '-' + r
+
         if (NGN.ref[r] === undefined || NGN.ref[r] === null) {
-          NGN.ref.create(r, me.references[r])
+          NGN.ref.create(r, this.references[originalName])
+
+          Object.defineProperty(this.ref, originalName, NGN.get(function () {
+            return NGN.ref[r]
+          }))
         }
       })
 
       // For each datastore, listen to the store's events and bubble the event.
       if (this.scope !== null) {
-        Object.keys(this.datastores).forEach(function (name) {
-          me.scopeStoreEvents(name)
+        Object.keys(this.datastores).forEach((name) => {
+          this.scopeStoreEvents(name)
         })
       }
     }
@@ -227,9 +276,10 @@ if (!NGN) {
      */
     render (name, data, parent, position, callback) {
       if (!this.templates.hasOwnProperty(name)) {
-        console.warn('The Driver does not have a reference to a template called \"' + name.trim() + '\".')
+        console.warn('The Driver does not have a reference to a template called %c' + name.trim() + '%c.', NGN.css, '')
         return
       }
+
       if (typeof data !== 'object') {
         console.warn('The data provided to the renderer could not be processed because it is not a key/value object.', data)
         return
@@ -240,25 +290,28 @@ if (!NGN) {
         NGN.NET.template(this.templates[name], data, parent)
         return
       }
+
       // If the parent is a selector, reference the element.
       if (typeof parent === 'string') {
         let p = parent
+
         parent = document.querySelector(parent)
+
         if (parent === null) {
-          console.warn(p + ' is not a valid selector or the referenced parent DOM element could not be found.')
+          console.warn('%c' + p + '%c is not a valid selector or the referenced parent DOM element could not be found.', NGN.css, '')
           return
         }
       }
-      position = (position || 'beforeend').toLowerCase()
-      let me = this
 
-      NGN.NET.template(this.templates[name], data, function (element) {
+      position = (position || 'beforeend').toLowerCase()
+
+      NGN.NET.template(this.templates[name], data, (element) => {
         if (NGN.hasOwnProperty('DOM')) {
-          NGN.DOM.svg.update(element, function () {
-            me.adjustedRender(parent, element, position, callback)
+          NGN.DOM.svg.update(element, () => {
+            this.adjustedRender(parent, element, position, callback)
           })
         } else {
-          me.adjustedRender(parent, element, position, callback)
+          this.adjustedRender(parent, element, position, callback)
         }
       })
     }
@@ -266,25 +319,32 @@ if (!NGN) {
     adjustedRender (parent, element, position, callback) {
       if (['beforebegin', 'afterbegin', 'afterend'].indexOf(position.trim().toLowerCase()) < 0) {
         parent.appendChild(element)
+
         this.templateRendered(element)
+
         if (callback) {
           callback()
         }
       } else {
         parent.insertAdjacentHTML(position, element.outerHTML)
+
         switch (position) {
           case 'beforebegin':
             this.templateRendered(parent.previousSibling)
             break
+
           case 'afterend':
             this.templateRendered(parent.nextSibling)
             break
+
           case 'afterbegin':
             this.templateRendered(parent.firstChild)
             break
+
           default:
             this.templateRendered(parent.lastChild)
         }
+
         if (callback) {
           callback()
         }
@@ -318,16 +378,17 @@ if (!NGN) {
      * The store to reference.
      */
     addStore (name, store) {
-      const me = this
       if (this.datastores.hasOwnProperty(name)) {
         if (this.scope !== null) {
           // Remove namespaced events.
-          this.dataevents.forEach(function (e) {
-            NGN.BUS.off(me.scope + e)
+          this.dataevents.forEach((e) => {
+            NGN.BUS.off(this.scope + e)
           })
         }
-        console.warn('Driver already had a reference to ' + name + ', which has been overwritten.')
+
+        console.warn('Driver already had a reference to %c' + name + '%c, which has been overwritten.', NGN.css, '')
       }
+
       this.datastores[name] = store
       this.scopeStoreEvents(name)
     }
@@ -384,8 +445,10 @@ if (!NGN) {
      */
     scopeStoreEvents (name, suppress) {
       suppress = NGN.coalesce(suppress, false)
+
+      const me = this
+
       if (this.scope !== null) {
-        const me = this
         const sep = this.scope === null ? 'NONE' : this.scope.substr(this.scope.length - 1, 1)
 
         this.dataevents.forEach(function (e) {
@@ -415,22 +478,6 @@ if (!NGN) {
     }
 
     /**
-     * @property {NGN.ref} ref
-     * Returns a DOM reference.
-     */
-    get ref () {
-      return NGN.ref
-    }
-
-    /**
-     * @property {NGN.ref} dom
-     * Returns a DOM reference. This is a shortcut to #ref.
-     */
-    get dom () {
-      return this.ref
-    }
-
-    /**
      * @method on
      * Create an event handler
      * @param {string} eventName
@@ -441,13 +488,14 @@ if (!NGN) {
     on () {
       const topic = arguments[0]
       if (!NGN.BUS) {
-        console.warn("NGNX.Driver.on('" + topic + "', ...) will not work because NGN.BUS is not available.")
+        console.warn('%cNGNX.Driver.on(\'' + topic + '\', ...)%c will not work because NGN.BUS is not available.', NGN.css, '')
         return
       }
+
       if (this.events.indexOf(topic) >= 0) {
         NGN.BUS.on.apply(NGN.BUS, arguments)
       } else {
-        console.warn(topic + ' is not a supported event for this Driver.')
+        console.warn('%c' + topic + '%c is not a supported event for this Driver.', NGN.css, '')
       }
     }
 
@@ -508,8 +556,11 @@ if (!NGN) {
         data = extra
         extra = ''
       }
+
       let scope = (this.scope + extra).trim()
+
       scope = scope.length > 0 ? scope : null
+
       NGN.BUS.pool(scope, data)
     }
 
