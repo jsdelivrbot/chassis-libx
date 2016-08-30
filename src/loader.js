@@ -133,11 +133,13 @@ if (!NGN) {
           }, 5)
         })
       } else {
-        if (typeof callback === 'function') {
-          callback(this.sync.concat(this.async))
-        } else {
-          NGN.BUS.emit(callback, this.sync.concat(this.async))
-        }
+        setTimeout(function () {
+          if (typeof callback === 'function') {
+            callback(me.sync.concat(me.async))
+          } else {
+            NGN.BUS.emit(callback, me.sync.concat(me.async))
+          }
+        }, 5)
       }
     }
   }
