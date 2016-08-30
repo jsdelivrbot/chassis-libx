@@ -500,28 +500,6 @@ if (!NGN) {
     }
 
     /**
-     * @method on
-     * Create an adhoc event handler that will be removed after executing.
-     * @param {string} eventName
-     * Name of the event to handle.
-     * @param {function} handler
-     * The handler function that responds to the event.
-     */
-    once () {
-      const topic = arguments[0]
-      if (!NGN.BUS) {
-        console.warn('%cNGNX.Driver.on(\'' + topic + '\', ...)%c will not work because NGN.BUS is not available.', NGN.css, '')
-        return
-      }
-
-      if (this.events.indexOf(topic) >= 0) {
-        NGN.BUS.once.apply(NGN.BUS, arguments)
-      } else {
-        console.warn('%c' + topic + '%c is not a supported event for this Driver.', NGN.css, '')
-      }
-    }
-
-    /**
      * @method pool
      * A shortcut method to create an NGN.BUS.pool. This method will automatically
      * apply the #namespace prefix to the pool. It is possible to create multiple pools
