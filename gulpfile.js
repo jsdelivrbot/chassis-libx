@@ -7,6 +7,8 @@ const uglify = require('gulp-uglify')
 const babel = require('gulp-babel')
 const cp = require('child_process')
 const header = require('gulp-header')
+const sourcemaps = require('gulp-sourcemaps')
+const ShortBus = require('shortbus')
 const del = require('del')
 const MustHave = require('musthave')
 const mh = new MustHave({
@@ -102,29 +104,56 @@ const walk = function (dir) {
 require('colors')
 gulp.task('generate', function () {
   console.log('Generating distribution files in ', DIR.dist)
+  const tasks = new ShortBus()
+  const mapRoot = 'https://cdn.author.io/ngnx/' + pkg.version
+  const srcmapcfg = {
+    includeContent: true,
+    sourceMappingURL: function (file) {
+      return mapRoot + '/' + file.relative + '.map'
+    },
+    sourceURL: function (file) {
+      return file.relative.replace('.min.js', '.js')
+    }
+  }
 
   common.forEach(function (filename) {
-    console.log('Generating common file:', filename)
-    gulp.src(path.join(DIR.source, filename))
-      .pipe(concat(filename.replace('.js', '.min.js').replace(path.sep, '.')))
-      .pipe(babel(babelConfig))
-      .pipe(uglify(minifyConfig))
-      .pipe(header(headerComment))
-      .pipe(gulp.dest(DIR.dist))
+    tasks.add('Generating common file:' + filename, function (cont) {
+      gulp.src(path.join(DIR.source, filename))
+        .pipe(concat(filename.replace('.js', '.min.js').replace(path.sep, '.')))
+        .pipe(babel(babelConfig))
+        .pipe(uglify(minifyConfig))
+        .pipe(header(headerComment))
+        .pipe(sourcemaps.write('./sourcemaps', srcmapcfg))
+        .pipe(gulp.dest(DIR.dist))
+        .on('end', cont)
+    })
   })
 
   // Generate full project
-  gulp.src(expand(common))
-  .pipe(concat('chassis.x.dev.js'))
-  .pipe(header(headerComment))
-  .pipe(gulp.dest(DIR.dist))
+  tasks.add('Generating debug version: chassis.x.dev.js', function (cont) {
+    gulp.src(expand(common))
+      .pipe(concat('chassis.x.dev.js'))
+      .pipe(header(headerComment))
+      .pipe(gulp.dest(DIR.dist))
+      .on('end', cont)
+  })
 
-  return gulp.src(expand(common))
-  .pipe(concat('chassis.x.min.js'))
-  .pipe(babel(babelConfig))
-  .pipe(uglify(minifyConfig))
-  .pipe(header(headerComment))
-  .pipe(gulp.dest(DIR.dist))
+  tasks.add('Generate full library: chassis.x.min.js', function (cont) {
+    return gulp.src(expand(common))
+      .pipe(concat('chassis.x.min.js'))
+      .pipe(babel(babelConfig))
+      .pipe(uglify(minifyConfig))
+      .pipe(header(headerComment))
+      .pipe(sourcemaps.write('./sourcemaps', srcmapcfg))
+      .pipe(gulp.dest(DIR.dist))
+      .on('end', cont)
+  })
+
+  tasks.on('stepstarted', (step) => {
+    console.log(step.number + ')', step.name)
+  })
+
+  tasks.process(true)
 })
 
 gulp.task('prereleasecheck', function (next) {
