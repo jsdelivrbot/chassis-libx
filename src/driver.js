@@ -143,13 +143,6 @@ if (!NGN) {
         datastores: NGN.const(cfg.stores || {}),
 
         /**
-         * @property {Array} events
-         * Contains a list of events that can be triggered by this driver.
-         * @private
-         */
-        events: NGN.private([]),
-
-        /**
          * @cfg {Object} templates
          * A named reference to NGN.NET templates. For example:
          *
@@ -238,6 +231,10 @@ if (!NGN) {
      * @private
      */
     createReference (name, selector) {
+      if (!selector) {
+        throw new Error('Invalid selector specified for new ' + name + ' reference.')
+      }
+
       let originalName = name
       name = this.id + '-' + name
 
