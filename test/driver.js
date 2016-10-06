@@ -73,3 +73,16 @@ test('NGNX.Driver', function (t) {
     test: 'test'
   })
 })
+
+test('NGNX.Driver Event Emitter', function (t) {
+  var MyController = new NGNX.Driver({
+    namespace: 'mycontroller.'
+  })
+
+  MyController.on('testevent', function (payload) {
+    t.ok(payload.test === 1, 'Namespaced event recognized.')
+    t.end()
+  })
+
+  NGN.BUS.emit('mycontroller.testevent', {test: 1})
+})

@@ -528,11 +528,8 @@ if (!NGN) {
         return
       }
 
-      if (this.events.indexOf(topic) >= 0) {
-        NGN.BUS.on.apply(NGN.BUS, arguments)
-      } else {
-        console.warn('%c' + topic + '%c is not a supported event for this Driver.', NGN.css, '')
-      }
+      arguments[0] = this.scope + arguments[0]
+      NGN.BUS.on.apply(NGN.BUS, arguments)
     }
 
     /**
