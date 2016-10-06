@@ -185,7 +185,7 @@ if (!NGN) {
          * Driver initiates the download. It also allows different drivers to
          * handle the response in a different manner.
          */
-        templates: NGN.privateconst(cfg.templates || {}),
+        templates: NGN.private(cfg.templates || {}),
 
         /**
          * @property {Array} dataevents
@@ -217,17 +217,7 @@ if (!NGN) {
 
       // Generate references
       Object.keys(this.references).forEach((r) => {
-        const originalName = r
-
-        r = this.id + '-' + r
-
-        if (NGN.ref[r] === undefined || NGN.ref[r] === null) {
-          NGN.ref.create(r, this.references[originalName])
-
-          Object.defineProperty(this.ref, originalName, NGN.get(function () {
-            return NGN.ref[r]
-          }))
-        }
+        this.createReference(r, this.references[r])
       })
 
       // For each datastore, listen to the store's events and bubble the event.
@@ -236,6 +226,52 @@ if (!NGN) {
           this.scopeStoreEvents(name)
         })
       }
+    }
+
+    /**
+     * @method createReference
+     * Create a new reference associated with the Driver.
+     * @param {string} name
+     * Reference name.
+     * @param {string} selector
+     * The selector.
+     * @private
+     */
+    createReference (name, selector) {
+      let originalName = name
+      name = this.id + '-' + name
+
+      if (NGN.ref[name] === undefined || NGN.ref[name] === null) {
+        NGN.ref.create(name, this.references[originalName])
+
+        Object.defineProperty(this.ref, originalName, NGN.get(function () {
+          return NGN.ref[name]
+        }))
+      }
+    }
+
+    /**
+     * @alias addReference
+     * Same as #createReference
+     * @param {string} name
+     * Reference name.
+     * @param {string} selector
+     * The selector.
+     */
+    addReference () {
+      this.createReference.apply(this, arguments)
+    }
+
+    /**
+     * @method addTemplate
+     * A helper method to add a new template in realtime.
+     * @param {string} name
+     * The template name.
+     * @param {string} source
+     * The URL/fielpath where the template can be accessed.
+     */
+    addTemplate (name, source) {
+      this.templates[name] = source
     }
 
     /**
