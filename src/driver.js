@@ -239,7 +239,7 @@ if (!NGN) {
       name = this.id + '-' + name
 
       if (NGN.ref[name] === undefined || NGN.ref[name] === null) {
-        NGN.ref.create(name, this.references[originalName])
+        NGN.ref.create(name, selector)
 
         Object.defineProperty(this.ref, originalName, NGN.get(function () {
           return NGN.ref[name]
