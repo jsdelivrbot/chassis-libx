@@ -74,6 +74,9 @@ if (!NGN) {
      * files are loaded. The callback receives a single array argument containing
      * all of the files loaded. This same argument is sent as a payload to the
      * event bus.
+     * @fires load.sync
+     * Triggered when a file is loaded synchronously. Event handlers will received
+     * the name of the file as an argument.
      */
     window.NGNX.Loader = function (cfg, callback) {
       cfg = cfg || {}
@@ -108,7 +111,10 @@ if (!NGN) {
 
       // Synchronous file loader
       var loadSync = function (files) {
-        NGN.NET.import(files.shift(), function () {
+        var currentFile = files.shift()
+        NGN.NET.import(currentFile, function () {
+          NGN.BUS.emit('load.sync', currentFile)
+
           if (files.length > 0) {
             loadSync(files)
           }
