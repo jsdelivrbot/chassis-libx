@@ -351,36 +351,34 @@ if (!NGN) {
 
     adjustedRender (parent, element, position, callback) {
       if (['beforebegin', 'afterbegin', 'afterend'].indexOf(position.trim().toLowerCase()) < 0) {
-        parent.appendChild(element)
+        position = 'beforeend'
+      }
 
-        this.templateRendered(element)
+      parent.insertAdjacentElement(position, element)
 
-        if (callback) {
-          callback(element)
-        }
-      } else {
-        parent.insertAdjacentElement(position, element)
+      switch (position) {
+        case 'beforeend':
+          this.templateRendered(element)
+          break
 
-        switch (position) {
-          case 'beforebegin':
-            this.templateRendered(parent.previousSibling)
-            break
+        case 'beforebegin':
+          this.templateRendered(parent.previousSibling)
+          break
 
-          case 'afterend':
-            this.templateRendered(parent.nextSibling)
-            break
+        case 'afterend':
+          this.templateRendered(parent.nextSibling)
+          break
 
-          case 'afterbegin':
-            this.templateRendered(parent.firstChild)
-            break
+        case 'afterbegin':
+          this.templateRendered(parent.firstChild)
+          break
 
-          default:
-            this.templateRendered(parent.lastChild)
-        }
+        default:
+          this.templateRendered(parent.lastChild)
+      }
 
-        if (callback) {
-          callback(element)
-        }
+      if (callback) {
+        callback(element)
       }
     }
 
