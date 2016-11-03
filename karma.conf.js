@@ -102,7 +102,7 @@ switch (mode) {
       base: 'SauceLabs',
       browserName: 'microsoftedge',
       platform: 'Windows 10',
-      version: '20.10240'
+      version: '14'
     }
 
     sauceConfiguration.tunnelIdentifier = process.env.SEMAPHORE_PROJECT_HASH_ID
