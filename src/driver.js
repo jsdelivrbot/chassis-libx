@@ -340,8 +340,8 @@ if (!NGN) {
 
       NGN.NET.template(this.templates[name], data, (element) => {
         if (NGN.hasOwnProperty('DOM')) {
-          NGN.DOM.svg.update(element, () => {
-            this.adjustedRender(parent, element, position, callback)
+          NGN.DOM.svg.update(element, (content) => {
+            this.adjustedRender(parent, content, position, callback)
           })
         } else {
           this.adjustedRender(parent, element, position, callback)
@@ -354,7 +354,11 @@ if (!NGN) {
         position = 'beforeend'
       }
 
-      parent.insertAdjacentElement(position, element)
+      if (typeof element === 'string') {
+        parent.insertAdjacentHTML(position, element)
+      } else {
+        parent.insertAdjacentElement(position, element)
+      }
 
       switch (position) {
         case 'beforeend':

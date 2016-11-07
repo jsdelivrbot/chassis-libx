@@ -151,10 +151,15 @@ var getFiles = function () {
     ]
   }
 
-  let allfiles = ['https://rawgit.com/ngnjs/cdn/master/chassis-lib/chassis.legacy.min.js']
+  // let allfiles = ['https://rawgit.com/ngnjs/cdn/master/chassis-lib/chassis.legacy.min.js']
+  let allfiles = ['https://cdn.author.io/ngn/latest/chassis.legacy.min.js']
   allfiles = allfiles.concat(files)
   allfiles.push('test/*.js')
-  allfiles.push('test/test.html')
+  allfiles.push({
+    pattern: 'test/*.html',
+    served: true,
+    nocache: true
+  })
 
   return allfiles
 }

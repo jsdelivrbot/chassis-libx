@@ -26,7 +26,7 @@ test('NGNX.Driver', function (t) {
       mystore: Models
     },
     templates: {
-      test: './test/test.html'
+      test: './base/test/template.html'
     }
   })
 
@@ -50,6 +50,7 @@ test('NGNX.Driver', function (t) {
     MyController.pool('template.', {
       render: function () {
         t.ok(document.getElementById('test1') !== undefined, 'Successfully rendered template.')
+        t.ok(document.querySelector('svg > g > path') !== null, 'Successfully rendered template with SVG.')
         t.end()
       }
     })
@@ -58,9 +59,10 @@ test('NGNX.Driver', function (t) {
       t.pass('Driver event pooling triggered successfully.')
       NGN.BUS.once('test.scoped.event.received', function () {
         t.pass('Driver.emit() properly scopes an event on the NGN.BUS.')
-        // MyController.render('test', {}, document.body)
-        t.end()
+
+        MyController.render('test', {}, document.body)
       })
+
       MyController.emit('scoped.event.received')
     })
 
