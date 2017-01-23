@@ -196,7 +196,7 @@ test('NGNX.TaskRunner Abort Process', {
   var tasks = new NGNX.TaskRunner()
   var total = 0
 
-  for (let x = 0; x < 50; x++) {
+  for (var x = 0; x < 50; x++) {
     tasks.add(function (next) {
       setTimeout(function () {
         total++
