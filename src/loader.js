@@ -81,14 +81,13 @@ if (!NGN) {
     window.NGNX.Loader = function (cfg, callback) {
       cfg = cfg || {}
 
-      var me = this
       Object.defineProperties(this, {
         /**
          * @cfg {Array|String} sync
          * The files that will be loaded one-by-one. They are loaded in the order
          * they are specified.
          */
-        async: NGN.define(true, true, false, cfg.async || []),
+        async: NGN.public(cfg.async || []),
 
         /**
          * @cfg {Array|String} async
@@ -98,21 +97,22 @@ if (!NGN) {
          * are loaded. The point of this method is to reduce time-to-load (parallel
          * downloads).
          */
-        sync: NGN.define(true, true, false, cfg.sync || [])
+        sync: NGN.public(cfg.sync || [])
       })
 
       this.async = Array.isArray(this.async) ? this.async : [this.async]
       this.sync = Array.isArray(this.sync) ? this.sync : [this.sync]
 
-      var meta = {
+      let meta = {
         sync: this.sync,
         async: this.async
       }
 
       // Synchronous file loader
-      var loadSync = function (files) {
+      const loadSync = function (files) {
         var currentFile = files.shift()
         NGN.NET.import(currentFile, function () {
+          console.log('Imported', currentFile)
           NGN.BUS.emit('load.sync', currentFile)
 
           if (files.length > 0) {
@@ -123,29 +123,54 @@ if (!NGN) {
 
       // Load synchronous files first
       if (meta.sync.length > 0) {
+        console.log('RUNNING')
         loadSync(meta.sync)
+      }
+
+      const responder = (imported, callback) => {
+        if (typeof callback === 'function') {
+          callback(this.sync.concat(imported))
+        } else {
+          NGN.BUS.emit(callback, this.sync.concat(imported))
+        }
       }
 
       // Load asynchronous files
       if (this.async.length > 0) {
         NGN.NET.import(this.async, function (imported) {
-          // Force a slight delay to assure everything is loaded.
-          setTimeout(function () {
-            if (typeof callback === 'function') {
-              callback(me.sync.concat(imported))
-            } else {
-              NGN.BUS.emit(callback, me.sync.concat(me.async))
-            }
-          }, 5)
+          if (window.hasOwnProperty('fetch')) {
+            responder(this.sync.concat(imported), callback)
+          } else {
+            // Force a slight delay to assure everything is loaded.
+            // Double timeouts forces a "nextTick" action in some browsers.
+            setTimeout(() => {
+              setTimeout(() => {
+                responder(this.sync.concat(imported), callback)
+                // if (typeof callback === 'function') {
+                //   callback(this.sync.concat(imported))
+                // } else {
+                //   NGN.BUS.emit(callback, this.sync.concat(imported))
+                // }
+              }, 5)
+            }, 0)
+          }
         })
       } else {
-        setTimeout(function () {
-          if (typeof callback === 'function') {
-            callback(me.sync.concat(me.async))
-          } else {
-            NGN.BUS.emit(callback, me.sync.concat(me.async))
-          }
-        }, 5)
+        if (window.hasOwnProperty('fetch')) {
+          responder(this.sync.concat(this.async), callback)
+        } else {
+          // Double timeouts forces a "nextTick" action in some browsers.
+          setTimeout(() => {
+            setTimeout(() => {
+              responder(this.sync.concat(this.async), callback)
+              // if (typeof callback === 'function') {
+              //   callback(this.sync.concat(this.async))
+              // } else {
+              //   NGN.BUS.emit(callback, this.sync.concat(this.async))
+              // }
+            }, 5)
+          }, 0)
+        }
       }
     }
   }

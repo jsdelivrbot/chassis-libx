@@ -147,7 +147,9 @@ var getFiles = function () {
       'src/data/httpproxy.js',
       'src/driver.js',
       'src/loader.js',
-      'src/state.js'
+      'src/state.js',
+      'src/task.js',
+      'src/taskrunner.js'
     ]
   }
 
