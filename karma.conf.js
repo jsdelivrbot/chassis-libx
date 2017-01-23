@@ -108,6 +108,7 @@ switch (mode) {
     Object.keys(customLaunchers).forEach(function (launcher) {
       console.info('  - ' + customLaunchers[launcher].browserName + ':', customLaunchers[launcher].version)
     })
+    console.log(customLaunchers)
 
     sauceConfiguration.tunnelIdentifier = process.env.SEMAPHORE_PROJECT_HASH_ID
     sauceConfiguration.username = process.env.SAUCE_USERNAME
