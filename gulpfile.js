@@ -58,7 +58,9 @@ const common = [
   'data/httpproxy.js',
   'driver.js',
   'loader.js',
-  'state.js'
+  'state.js',
+  'task.js',
+  'taskrunner.js'
 ]
 
 const minifyConfig = {
