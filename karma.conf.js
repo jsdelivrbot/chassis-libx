@@ -32,20 +32,21 @@ switch (mode) {
     caniuse = require('caniuse-api')
     lb = caniuse.getLatestStableBrowsers()
 
-    console.info('Latest Stable Browsers:')
-
     browsers.push('firefox')
 
-    lb.forEach(function (item) {
+    var b = {}
+    lb = lb.forEach(function (item, index, arr) {
       item = item.split(' ')
-      var browser = item[0]
-      var version = item[1]
-      var willtest = false
+      b[item[0].toLowerCase()] = item[1]
+    })
 
-      // Sauce labs continually fails when testing the "latest" Firefox, so rollback a version.
-      if (browser === 'firefox') {
-        version -= 1
-      }
+    Object.keys(b).forEach(function (browser) {
+      var version = b[browser]
+      var willtest = false // eslint-disable-line no-unused-vars
+
+      // if (browser === 'firefox') {
+      //   version -= 1
+      // }
 
       if (browsers.indexOf(browser) >= 0 ||
         !useDistributionFiles && browser === 'edge' ||
@@ -53,10 +54,11 @@ switch (mode) {
         willtest = true
       }
 
-      console.info('  - ' + browser + ':', version + (willtest ? ' ---> WILL BE TESTED' : ''))
+      // console.info('  - ' + browser + ':', version + (willtest ? ' ---> WILL BE TESTED' : ''))
 
       if (browsers.indexOf(browser) >= 0) {
-        customLaunchers['cl_chrome_' + version.toString()] = {
+        // version = version - 1
+        customLaunchers['cl_' + browser + '_' + version.toString()] = {
           base: 'SauceLabs',
           browserName: browser,
           version: version
@@ -65,9 +67,6 @@ switch (mode) {
     })
 
     if (useDistributionFiles) {
-      console.log('Also testing:')
-
-      console.log('  - safari 8')
       customLaunchers.cl_safari_8 = {
         base: 'SauceLabs',
         browserName: 'safari',
@@ -104,6 +103,11 @@ switch (mode) {
       platform: 'Windows 10',
       version: '14'
     }
+
+    console.log('Testing Browsers:')
+    Object.keys(customLaunchers).forEach(function (launcher) {
+      console.info('  - ' + customLaunchers[launcher].browserName + ':', customLaunchers[launcher].version)
+    })
 
     sauceConfiguration.tunnelIdentifier = process.env.SEMAPHORE_PROJECT_HASH_ID
     sauceConfiguration.username = process.env.SAUCE_USERNAME
