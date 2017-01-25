@@ -112,7 +112,6 @@ if (!NGN) {
       const loadSync = function (files) {
         var currentFile = files.shift()
         NGN.NET.import(currentFile, function () {
-          console.log('Imported', currentFile)
           NGN.BUS.emit('load.sync', currentFile)
 
           if (files.length > 0) {
@@ -123,7 +122,6 @@ if (!NGN) {
 
       // Load synchronous files first
       if (meta.sync.length > 0) {
-        console.log('RUNNING')
         loadSync(meta.sync)
       }
 
@@ -142,15 +140,10 @@ if (!NGN) {
             responder(this.sync.concat(imported), callback)
           } else {
             // Force a slight delay to assure everything is loaded.
-            // Double timeouts forces a "nextTick" action in some browsers.
+            // Double timeouts forces a "nextTick" type of action in some browsers.
             setTimeout(() => {
               setTimeout(() => {
                 responder(this.sync.concat(imported), callback)
-                // if (typeof callback === 'function') {
-                //   callback(this.sync.concat(imported))
-                // } else {
-                //   NGN.BUS.emit(callback, this.sync.concat(imported))
-                // }
               }, 5)
             }, 0)
           }
@@ -159,15 +152,10 @@ if (!NGN) {
         if (window.hasOwnProperty('fetch')) {
           responder(this.sync.concat(this.async), callback)
         } else {
-          // Double timeouts forces a "nextTick" action in some browsers.
+          // Double timeouts forces a "nextTick" type of action in some browsers.
           setTimeout(() => {
             setTimeout(() => {
               responder(this.sync.concat(this.async), callback)
-              // if (typeof callback === 'function') {
-              //   callback(this.sync.concat(this.async))
-              // } else {
-              //   NGN.BUS.emit(callback, this.sync.concat(this.async))
-              // }
             }, 5)
           }, 0)
         }
