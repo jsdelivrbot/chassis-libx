@@ -135,7 +135,7 @@ if (!NGN) {
 
       // Load asynchronous files
       if (this.async.length > 0) {
-        NGN.NET.import(this.async, function (imported) {
+        NGN.NET.import(this.async, (imported) => {
           if (window.hasOwnProperty('fetch')) {
             responder(this.sync.concat(imported), callback)
           } else {
