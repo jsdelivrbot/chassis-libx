@@ -5,7 +5,7 @@ var test = require('tape')
 test('NGNX.ViewRegistry Sanity Checks', function (t) {
   t.ok(typeof NGNX.ViewRegistry === 'function', 'NGNX.ViewRegistry exists as a class.')
 
-  let myReg
+  var myReg
   try {
     myReg = new NGNX.ViewRegistry()
     t.fail('Instantiated with bad configuration.')
