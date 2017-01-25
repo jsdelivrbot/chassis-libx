@@ -709,5 +709,6 @@ if (!NGN) {
       NGN.BUS.attach.apply(NGN.BUS, this.applyNamespace(arguments))
     }
   }
+
   NGNX.Driver = Driver
 }

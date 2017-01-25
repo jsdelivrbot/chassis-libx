@@ -122,5 +122,6 @@ if (!NGN) {
     }
   }
 
-  Object.defineProperty(NGNX, 'ViewRegistry', NGN.const(ViewRegistry))
+  NGNX.ViewRegistry = ViewRegistry
+  // Object.defineProperty(NGNX, 'ViewRegistry', NGN.const(ViewRegistry))
 }
