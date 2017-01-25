@@ -3,7 +3,7 @@
 if (!NGN) {
   console.error('NGN not found.')
 } else {
-  global.NGNX = global.NGNX || {}
+  window.NGNX = window.NGNX || {}
 
   /**
    * @class NGNX.ViewRegistry

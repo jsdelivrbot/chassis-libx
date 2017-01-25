@@ -153,7 +153,8 @@ var getFiles = function () {
       'src/loader.js',
       'src/state.js',
       'src/task.js',
-      'src/taskrunner.js'
+      'src/taskrunner.js',
+      'src/viewregistry.js'
     ]
   }
 
