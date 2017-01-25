@@ -200,6 +200,12 @@ if (!NGN) {
         ]),
 
         /**
+         * @cfg {object} [events]
+         * An object of events passed to #NGN.BUS.pool.
+         */
+        initialpool: NGN.privateconst(cfg.events || null),
+
+        /**
          * @property {string} id
          * A key to uniquely identify the driver. This is an auto-generated
          * GUID, assigned in realtime.
@@ -218,6 +224,11 @@ if (!NGN) {
         Object.keys(this.datastores).forEach((name) => {
           this.scopeStoreEvents(name)
         })
+      }
+
+      // Apply the initial event handlers
+      if (this.initialpool) {
+        this.pool(this.initialpool)
       }
     }
 
@@ -513,6 +524,30 @@ if (!NGN) {
     }
 
     /**
+     * @method applyNamespace
+     * A helper method for applying a namespace to the first argument of a method.
+     * @private
+     */
+    applyNamespace (args) {
+      if (args.length === 0) {
+        return arguments
+      }
+
+      if (typeof args[0] !== 'string') {
+        return arguments
+      }
+
+      if (!NGN.BUS) {
+        console.warn('%cNGNX.Driver.on(\'' + arguments[0] + '\', ...)%c will not work because NGN.BUS is not available.', NGN.css, '')
+        return
+      }
+
+      args[0] = NGN.coalesce(this.scope, '') + args[0]
+
+      return args
+    }
+
+    /**
      * @method on
      * Create an event handler
      * @param {string} eventName
@@ -521,14 +556,52 @@ if (!NGN) {
      * The handler function that responds to the event.
      */
     on () {
-      const topic = arguments[0]
-      if (!NGN.BUS) {
-        console.warn('%cNGNX.Driver.on(\'' + topic + '\', ...)%c will not work because NGN.BUS is not available.', NGN.css, '')
-        return
-      }
+      NGN.BUS.on.apply(NGN.BUS, this.applyNamespace(arguments))
+    }
 
-      arguments[0] = this.scope + arguments[0]
-      NGN.BUS.on.apply(NGN.BUS, arguments)
+    /**
+     * @method once
+     * Create an event handler that's removed after it executes one time.
+     * @param {string} eventName
+     * Name of the event to handle.
+     * @param {function} handler
+     * The handler function that responds to the event.
+     */
+    once () {
+      NGN.BUS.once.apply(NGN.BUS, this.applyNamespace(arguments))
+    }
+
+    /**
+     * @method emit
+     * This is a shortcut to NGN.BUS.emit, but it adds the #namespace to the event.
+     *
+     * **Example**:
+     * ```js
+     * let MyDriver = new NGNX.Driver({
+     *   namespace: 'myprefix.'
+     * })
+     *
+     * MyDriver.emit('some.event') // <--- Emit event
+     * ```
+     * The last line where the event is emitted will actually send an event
+     * called `prefix.some.event` to the NGN BUS. In other words, the last line
+     * is the equivalent of running:
+     *
+     * ```js
+     * NGN.BUS.emit('prefix.some.event')
+     * ```
+     *
+     * The "value-add" of this method is prepending the namespace automatically.
+     * It also supports payloads (just like NGN.BUS.emit).
+     * @param {string} eventName
+     * The name of the event to trigger (with the #namespace prefixed to it).
+     * @param {object|string|number|boolean|array} payload
+     * An object to send to the event handler.
+     */
+    emit () {
+      // let args = this.applyNamespace(arguments)
+      // console.log(args)
+      NGN.BUS.emit.apply(NGN.BUS, this.applyNamespace(arguments))
     }
 
     /**
@@ -597,35 +670,43 @@ if (!NGN) {
     }
 
     /**
-     * @method emit
-     * This is a shortcut to NGN.BUS.emit, but it adds the #namespace to the event.
-     *
-     * **Example**:
-     * ```js
-     * let MyDriver = new NGNX.Driver({
-     *   namespace: 'myprefix.'
-     * })
-     *
-     * MyDriver.emit('some.event') // <--- Emit event
-     * ```
-     * The last line where the event is emitted will actually send an event
-     * called `prefix.some.event` to the NGN BUS. In other words, the last line
-     * is the equivalent of running:
-     *
-     * ```js
-     * NGN.BUS.emit('prefix.some.event')
-     * ```
-     *
-     * The "value-add" of this method is prepending the namespace automatically.
-     * It also supports payloads (just like NGN.BUS.emit).
-     * @param {string} eventName
-     * The name of the event to trigger (with the #namespace prefixed to it).
-     * @param {object|string|number|boolean|array} payload
-     * An object to send to the event handler.
+     * @method forward
+     * Customized alias of #NGN.BUS.forward that applies namespacing to listening event.
      */
-    emit () {
-      arguments[0] = this.scope + arguments[0]
-      NGN.BUS.emit.apply(NGN.BUS, arguments)
+    forward () {
+      NGN.BUS.forward.apply(NGN.BUS, this.applyNamespace(arguments))
+    }
+
+    /**
+     * @method delayEmit
+     * Customized alias of #NGN.BUS.delayEmit that applies namespacing to listening event.
+     */
+    delayEmit () {
+      NGN.BUS.delayEmit.apply(NGN.BUS, this.applyNamespace(arguments))
+    }
+
+    /**
+     * @method threshold
+     * Customized alias of #NGN.BUS.threshold that applies namespacing to listening event.
+     */
+    threshold () {
+      NGN.BUS.threshold.apply(NGN.BUS, this.applyNamespace(arguments))
+    }
+
+    /**
+     * @method thresholdOnce
+     * Customized alias of #NGN.BUS.thresholdOnce that applies namespacing to listening event.
+     */
+    thresholdOnce () {
+      NGN.BUS.thresholdOnce.apply(NGN.BUS, this.applyNamespace(arguments))
+    }
+
+    /**
+     * @method attach
+     * Customized alias of #NGN.BUS.attach that applies namespacing to listening event.
+     */
+    attach () {
+      NGN.BUS.attach.apply(NGN.BUS, this.applyNamespace(arguments))
     }
   }
   NGNX.Driver = Driver
