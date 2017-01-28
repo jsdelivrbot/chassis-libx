@@ -121,7 +121,7 @@ test('NGNX.Driver Forwarders', function (t) {
   MyController.emit('something')
 })
 
-test('NGNX.Driver Initial One-Off Events', function (t) {
+test('NGNX.Driver Initial One Off Events', function (t) {
   var x = 0
   var MyController = new NGNX.Driver({
     namespace: 'mycontroller3.',

@@ -709,7 +709,7 @@ if (!NGN) {
         extra = ''
       }
 
-      let scope = (this.scope + extra).trim()
+      let scope = (NGN.coalesce(this.scope, '') + extra).trim()
 
       scope = scope.length > 0 ? scope : null
       NGN.BUS.pool(scope, data)
