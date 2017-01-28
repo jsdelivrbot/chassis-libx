@@ -245,19 +245,24 @@ if (!NGN) {
 
       // Apply initial one-time event handlers
       if (this.initialpoolonce) {
-        Object.keys(this.initialpoolonce, (eventName) => {
+        Object.keys(this.initialpoolonce).forEach((eventName) => {
           this.once(eventName, this.initialpoolonce[eventName])
         })
       }
 
       // Apply initial forwarders
       if (this.initialforwarders) {
-        Object.keys(this.initialforwarders, (eventName) => {
+        Object.keys(this.initialforwarders).forEach((eventName) => {
           this.forward(eventName, this.initialforwarders[eventName])
         })
       }
     }
 
+    /**
+     * @property {object} references
+     * An alias of #ref.
+     * @readonly
+     */
     get references () {
       return this.ref
     }
