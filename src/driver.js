@@ -207,7 +207,7 @@ if (!NGN) {
 
         /**
          * @cfg {object} [once]
-         * An object of events run once and removed.
+         * An object of event handlers that are removed after executed one time.
          */
         initialpoolonce: NGN.privateconst(cfg.once || null),
 
