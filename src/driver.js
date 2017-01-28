@@ -240,7 +240,6 @@ if (!NGN) {
 
       // Apply the initial event handlers
       if (this.initialpool) {
-        console.log(this.initialpool)
         this.pool(this.initialpool)
       }
 
