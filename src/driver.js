@@ -101,7 +101,7 @@ if (!NGN) {
          * `DriverA.button` and `DriverB.button` both have a `button` reference,
          * but each one refers to a different DOM element.
          */
-        references: NGN.privateconst(cfg.references || {}),
+        _references: NGN.privateconst(NGN.coalesce(cfg.references, cfg.ref, {})),
 
         /**
          * @property {object} ref
@@ -206,6 +206,18 @@ if (!NGN) {
         initialpool: NGN.privateconst(cfg.events || null),
 
         /**
+         * @cfg {object} [once]
+         * An object of events run once and removed.
+         */
+        initialpoolonce: NGN.privateconst(cfg.once || null),
+
+        /**
+         * @cfg {object} [forward]
+         * An object containing bulk NGN.BUS.forward statements.
+         */
+        initialforwarders: NGN.privateconst(cfg.forward || null),
+
+        /**
          * @property {string} id
          * A key to uniquely identify the driver. This is an auto-generated
          * GUID, assigned in realtime.
@@ -215,8 +227,8 @@ if (!NGN) {
       })
 
       // Generate references
-      Object.keys(this.references).forEach((r) => {
-        this.createReference(r, this.references[r])
+      Object.keys(this._references).forEach((r) => {
+        this.createReference(r, this._references[r])
       })
 
       // For each datastore, listen to the store's events and bubble the event.
@@ -230,6 +242,24 @@ if (!NGN) {
       if (this.initialpool) {
         this.pool(this.initialpool)
       }
+
+      // Apply initial one-time event handlers
+      if (this.initialpoolonce) {
+        Object.keys(this.initialpoolonce, (eventName) => {
+          this.once(eventName, this.initialpoolonce[eventName])
+        })
+      }
+
+      // Apply initial forwarders
+      if (this.initialforwarders) {
+        Object.keys(this.initialforwarders, (eventName) => {
+          this.forward(eventName, this.initialforwarders[eventName])
+        })
+      }
+    }
+
+    get references () {
+      return this.ref
     }
 
     /**
