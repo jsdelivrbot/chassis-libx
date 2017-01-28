@@ -80,7 +80,9 @@ if (!NGN) {
         } else if (cfg.parent.scope) {
           cfg.namespace = cfg.parent.scope
         }
-      } else if (cfg.hasOwnProperty('references')) {
+      }
+
+      if (cfg.hasOwnProperty('references')) {
         Object.keys(cfg.references).forEach((r) => {
           cfg.references[r] = `${cfg.selector} ${cfg.references[r]}`
         })
