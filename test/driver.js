@@ -88,3 +88,68 @@ test('NGNX.Driver Event Emitter', function (t) {
 
   NGN.BUS.emit('mycontroller.testevent', {test: 1})
 })
+
+test('NGNX.Driver Initial Pooling', function (t) {
+  var MyController = new NGNX.Driver({
+    namespace: 'mycontroller2.',
+    events: {
+      some: {
+        name: function () {
+          t.pass('Deeply nested event detected.')
+          t.end()
+        }
+      }
+    }
+  })
+
+  MyController.emit('some.name')
+})
+
+test('NGNX.Driver Forwarders', function (t) {
+  var MyController = new NGNX.Driver({
+    namespace: 'mycontroller2.',
+    forward: {
+      something: 'all.done'
+    }
+  })
+
+  NGN.BUS.on('all.done', function () {
+    t.pass('Events forwarded.')
+    t.end()
+  })
+
+  MyController.emit('something')
+})
+
+test('NGNX.Driver Initial One-Off Events', function (t) {
+  var x = 0
+  var MyController = new NGNX.Driver({
+    namespace: 'mycontroller3.',
+    once: {
+      some: {
+        name: function () {
+          x++
+          t.ok(x === 1, 'Called only once.')
+          NGN.BUS.emit('singleton.done')
+
+          if (x < 2) {
+            setTimeout(function () {
+              MyController.emit('some.name')
+            }, 150)
+          }
+        }
+      }
+    }
+  })
+
+  NGN.BUS.once('singleton.done', function () {
+    if (x > 1) {
+      return
+    }
+    setTimeout(function () {
+      t.end()
+    }, 600)
+  })
+
+  MyController.emit('some.name')
+})

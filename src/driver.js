@@ -203,7 +203,7 @@ if (!NGN) {
          * @cfg {object} [events]
          * An object of events passed to #NGN.BUS.pool.
          */
-        initialpool: NGN.privateconst(cfg.events || null),
+        initialpool: NGN.privateconst(NGN.coalesce(cfg.events, cfg.pool, null)),
 
         /**
          * @cfg {object} [once]
@@ -240,13 +240,14 @@ if (!NGN) {
 
       // Apply the initial event handlers
       if (this.initialpool) {
+        console.log(this.initialpool)
         this.pool(this.initialpool)
       }
 
       // Apply initial one-time event handlers
       if (this.initialpoolonce) {
         Object.keys(this.initialpoolonce).forEach((eventName) => {
-          this.once(eventName, this.initialpoolonce[eventName])
+          this.initializeOneOffEvent(eventName, this.initialpoolonce[eventName])
         })
       }
 
@@ -256,6 +257,17 @@ if (!NGN) {
           this.forward(eventName, this.initialforwarders[eventName])
         })
       }
+    }
+
+    // A helper event to initialize one-off events from the configuration.
+    initializeOneOffEvent (eventName, handler, namespace = '') {
+      if (typeof handler === 'function') {
+        return this.once(namespace + eventName, handler)
+      }
+
+      Object.keys(handler).forEach((name) => {
+        this.initializeOneOffEvent(name, handler[name], namespace + eventName + '.')
+      })
     }
 
     /**
@@ -700,7 +712,6 @@ if (!NGN) {
       let scope = (this.scope + extra).trim()
 
       scope = scope.length > 0 ? scope : null
-
       NGN.BUS.pool(scope, data)
     }
 
