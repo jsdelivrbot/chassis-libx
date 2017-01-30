@@ -122,6 +122,19 @@ if (!NGN) {
     get self () {
       return NGN.ref[this.id]
     }
+
+    /**
+     * @method destroy
+     * Destroy the DOM element associated with the ViewRegistry.
+     * This does not affect any parent elements.
+     */
+    destroy () {
+      if (!NGN.hasOwnProperty('DOM')) {
+        throw new Error('NGN.DOM is required to invoke the destroy method.')
+      }
+
+      NGN.DOM.destroy(this.self)
+    }
   }
 
   NGNX.ViewRegistry = ViewRegistry
