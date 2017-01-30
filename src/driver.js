@@ -751,7 +751,7 @@ if (!NGN) {
      * Customized alias of #NGN.BUS.attach that applies namespacing to listening event.
      */
     attach () {
-      NGN.BUS.attach(this.scope + arguments[0], arguments[1])
+      return NGN.BUS.attach.apply(NGN.BUS, this.applyNamespace(arguments))
     }
   }
 
