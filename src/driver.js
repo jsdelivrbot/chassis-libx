@@ -411,6 +411,12 @@ if (!NGN) {
         position = 'beforeend'
       }
 
+      // Setup a mutation observer to guarantee the element is
+      // written to the DOM (if a response is expected)
+      if (NGN.isFn(callback)) {
+        NGN.DOM.guarantee(parent, element, 15000, callback)
+      }
+
       if (typeof element === 'string') {
         parent.insertAdjacentHTML(position, element)
       } else {
@@ -436,10 +442,6 @@ if (!NGN) {
 
         default:
           this.templateRendered(parent.lastChild)
-      }
-
-      if (callback) {
-        callback(element)
       }
     }
 
