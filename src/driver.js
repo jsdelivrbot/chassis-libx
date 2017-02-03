@@ -348,7 +348,7 @@ if (!NGN) {
      * ```
      * @param {string} name
      * The name of the template provided in #templates.
-     * @param {object} data
+     * @param {object|NGN.DATA.Model} data
      * The key/value object passed to the NGN.NET.template method.
      * @param {HTMLElement|String} [parent]
      * The parent element or a selector reference to the parent element
@@ -366,13 +366,17 @@ if (!NGN) {
      */
     render (name, data, parent, position, callback) {
       if (!this.templates.hasOwnProperty(name)) {
-        console.warn('The Driver does not have a reference to a template called %c' + name.trim() + '%c.', NGN.css, '')
-        return
+        throw new Error('The Driver does not have a reference to a template called ' + name.trim() + '.')
+      }
+
+      // If a data model was provided, get a representation of it.
+      if (data instanceof NGN.DATA.Entity) {
+        data = data.representation
       }
 
       if (typeof data !== 'object') {
-        console.warn('The data provided to the renderer could not be processed because it is not a key/value object.', data)
-        return
+        console.error('Invalid Data', data)
+        throw new Error('The data provided to the renderer could not be processed because it is not a key/value object.')
       }
 
       // If the parent is a function, treat it as a callback
@@ -395,6 +399,7 @@ if (!NGN) {
 
       position = (position || 'beforeend').toLowerCase()
 
+      // Import the template.
       NGN.NET.template(this.templates[name], data, (element) => {
         if (NGN.hasOwnProperty('DOM')) {
           NGN.DOM.svg.update(element, (content) => {
@@ -413,8 +418,14 @@ if (!NGN) {
 
       // Setup a mutation observer to guarantee the element is
       // written to the DOM (if a response is expected)
-      if (NGN.isFn(callback)) {
-        NGN.DOM.guarantee(parent, element, 15000, callback)
+      if (NGN.isFn(callback) && NGN.hasOwnProperty('DOM')) {
+        NGN.DOM.guarantee(parent, element, 15000, function (err, content) {
+          if (err) {
+            throw err
+          }
+
+          callback(content)
+        })
       }
 
       if (typeof element === 'string') {
@@ -442,6 +453,10 @@ if (!NGN) {
 
         default:
           this.templateRendered(parent.lastChild)
+      }
+
+      if (NGN.isFn(callback) && !NGN.hasOwnProperty('DOM')) {
+        callback()
       }
     }
 
