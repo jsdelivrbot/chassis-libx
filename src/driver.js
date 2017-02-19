@@ -203,7 +203,7 @@ if (!NGN) {
          * @cfg {object} [events]
          * An object of events passed to #NGN.BUS.pool.
          */
-        initialpool: NGN.privateconst(NGN.coalesce(cfg.events, cfg.pool, null)),
+        initialpool: NGN.privateconst(NGN.coalesce(cfg.on, cfg.events, cfg.pool, null)),
 
         /**
          * @cfg {object} [once]
