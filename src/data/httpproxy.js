@@ -126,6 +126,7 @@ if (NGN.DATA.Proxy && NGN.NET) {
       })
     })
   }
+
   NGN.inherit(NGN.DATA.Proxy, NGNX.DATA.HttpProxy)
 } else {
   throw new Error('NGN.DATA.Proxy & NGN.NET are required for NGN.DATA.HttpProxy.')

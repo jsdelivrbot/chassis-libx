@@ -55,6 +55,7 @@ gulp.task('clean', function (next) {
 })
 
 const common = [
+  'utility.js',
   'data/httpproxy.js',
   'driver.js',
   'loader.js',
@@ -65,7 +66,7 @@ const common = [
 ]
 
 const minifyConfig = {
-  presets: ['es2015'],
+  presets: ['es2015', 'es2017'],
   mangle: true,
   compress: {
     dead_code: true,

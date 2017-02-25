@@ -148,6 +148,7 @@ var getFiles = function () {
     ]
   } else {
     files = [
+      'src/utility.js',
       'src/data/httpproxy.js',
       'src/driver.js',
       'src/loader.js',

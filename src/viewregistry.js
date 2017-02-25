@@ -107,11 +107,39 @@ if (!NGN) {
          * The CSS selector string of the DOM element to manage. This is used
          * as the "root" of all NGN references & events.
          */
-        selector: NGN.const(cfg.selector)
+        selector: NGN.const(cfg.selector),
+
+        _state: NGN.private('default'),
+
+        /**
+         * @cfg {string} [initialstate=default]
+         * Specify the initial state of the registry. It is
+         * unnecessary to specify the default state.
+         */
+        initialstate: NGN.private(NGN.coalesce(cfg.initialstate, 'default')),
+
+        /**
+         * @cfg {Object} properties
+         * Specify the properties of the registry. Properties
+         */
+        propertyFields: NGN.private(NGN.coalesce(cfg.properties)),
+
+        _properties: NGN.private(null)
       })
 
       // Create a self reference by Driver ID (inherited)
       NGN.ref.create(this.id, this.selector)
+
+      // Initialize the properties store
+      if (this.propertyFields !== null) {
+        this._properties = new NGN.DATA.Model({
+          fields: this.propertyFields
+        })
+      }
+
+      if (this.initialstate !== this._state) {
+        this.state = this.initialstate
+      }
     }
 
     /**
@@ -121,6 +149,48 @@ if (!NGN) {
      */
     get self () {
       return NGN.ref[this.id]
+    }
+
+    get state () {
+      return NGN.coalesce(this._state, 'default')
+    }
+
+    /**
+     * @event state.changed
+     * Fired when the state changes. Handlers of this event will be
+     * provided an object containing the old and new state:
+     *
+     * ```js
+     * {
+     *   old: 'old_state',
+     *   new: 'new_state'
+     * }
+     * ```
+     */
+    set state (value) {
+      let old = this.state
+      this._state = value.toString().trim().toLowerCase()
+
+      this.emit('state.changed', {
+        old: old,
+        new: this._state
+      })
+
+      old = null
+    }
+
+    /**
+     * @property {NGN.DATA.Model} properties
+     * A reference to the properties of the registry.
+     * @readonly
+     */
+    get properties () {
+      if (this._properties === null) {
+        console.warn('Registry properties were requested, but none are configured.')
+        return {}
+      }
+
+      return this._properties
     }
 
     /**

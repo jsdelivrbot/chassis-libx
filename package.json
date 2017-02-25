@@ -1,6 +1,6 @@
 {
   "name": "ngnx-chassis",
-  "version": "1.2.11",
+  "version": "1.2.12",
   "description": "The opininated 'extra' library for NGN.",
   "main": "index.js",
   "scripts": {
@@ -51,6 +51,7 @@
   "homepage": "http://ngn.js.org",
   "devDependencies": {
     "babel-preset-es2015": "6.9.0",
+    "babel-preset-es2017": "^6.22.0",
     "browserify": "13.0.0",
     "buffer-equal-constant-time": "1.0.1",
     "caniuse-api": "1.5.0",
