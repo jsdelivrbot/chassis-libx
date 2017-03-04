@@ -56,10 +56,12 @@ if (!NGN) {
     constructor (cfg) {
       cfg = cfg || {}
 
+      // Require an object for the configuration
       if (typeof cfg !== 'object') {
         throw new Error(`Invalid configuration. Expected Object, received ${typeof cfg}.`)
       }
 
+      // Make sure the selector has been defined.
       if (!cfg.hasOwnProperty('selector')) {
         throw new Error('Missing required configuration attribute: selector')
       }
@@ -82,6 +84,7 @@ if (!NGN) {
         }
       }
 
+      // If there are references, scope them according to the selector.
       if (cfg.hasOwnProperty('references')) {
         Object.keys(cfg.references).forEach((r) => {
           cfg.references[r] = `${cfg.selector} ${cfg.references[r]}`
@@ -94,6 +97,7 @@ if (!NGN) {
         throw new Error(`Could not find valid DOM element for '${cfg.selector}'`)
       }
 
+      // Initialize the NGNX.Driver
       super(cfg)
 
       /**
@@ -109,14 +113,12 @@ if (!NGN) {
          */
         selector: NGN.const(cfg.selector),
 
-        _state: NGN.private('default'),
-
         /**
-         * @cfg {string} [initialstate=default]
-         * Specify the initial state of the registry. It is
-         * unnecessary to specify the default state.
+         * @cfg {NGNX.ViewRegistry} parent
+         * A parent registry. This identifies the view registry
+         * as a child of another.
          */
-        initialstate: NGN.private(NGN.coalesce(cfg.initialstate, 'default')),
+        _parent: NGN.privateconst(NGN.coalesce(cfg.parent)),
 
         /**
          * @cfg {Object} properties
@@ -124,8 +126,152 @@ if (!NGN) {
          */
         propertyFields: NGN.private(NGN.coalesce(cfg.properties)),
 
-        _properties: NGN.private(null)
+        _properties: NGN.private(null),
+
+        /**
+         * @cfg {Object} [states]
+         * Define what happens in each state. This is a key/value object
+         * where the key represents the name/identifier of the state (string)
+         * and the value is a function. The function receives a single argument,
+         * the state change object. This object contains the old and new state.
+         *
+         * **Example**
+         *
+         * ```js
+         * let Registry = new NGNX.ViewRegistry({
+         *   namespace: 'myscope.',
+         *   selector: '.path .to element',
+         *   references: {
+         *     connectionIndicator: '#indicator',
+         *     description: 'body > .description'
+         *   },
+         *   properties: {
+         *     online: Boolean,
+         *     description: {
+         *       type: String,
+         *       default: 'No description available.'
+         *     }
+         *   },
+         *   states: {
+         *     default: (stateChange) => {
+         *       this.properties.description = 'Unknown'
+         *     },
+         *
+         *     offline: (stateChange) => {
+         *       if (stateChange.old !== 'offline') {
+         *         this.properties.description = 'No connection established.'
+         *       }
+         *
+         *       this.ref.connectionIndicator.classList.remove('online')
+         *     },
+         *
+         *     online: (stateChange) => {
+         *       if (stateChange.new === 'online') {
+         *         this.properties.description = 'Connection established to remote server.'
+         *       }
+         *
+         *       this.ref.connectionIndicator.classList.add('online')
+         *     }
+         *   },
+         *   initialState: 'offline'
+         * })
+         *
+         * Registry.on('property.change', (change) => {
+         *   if (change.property === 'description') {
+         *     this.ref.description.innerHTML = change.new
+         *   }
+         * })
+         *
+         * // Change the state to "online"
+         * Registry.state = 'online'
+         *
+         * console.log(Registry.state) // Outputs "online"
+         *
+         * // Change the state back to "offline" after 3 seconds
+         * setTimeout(() => {
+         *   Registry.state = 'offline'
+         * }, 3000)
+         * ```
+         */
+        _states: NGN.private(NGN.coalesce(cfg.states, {})),
+
+        _state: NGN.private('default'),
+
+        displaystate: NGN.private(null),
+
+        /**
+         * @cfg {string} [initialState=default]
+         * Specify the initial state of the registry.
+         */
+        initialstate: NGN.private(NGN.coalesce(cfg.initialState, cfg.initialstate, 'default')),
+
+        /**
+         * @cfg {Object} [reactions]
+         * Map #parent states to the registry #states. This can be used to
+         * automatically cascade state changes throughout a view.
+         *
+         * **Example**
+         *
+         * ```js
+         * let Registry = new NGNX.ViewRegistry({
+         *   parent: MyParentViewRegistry,
+         *   namespace: 'myscope.',
+         *   selector: '.path .to element',
+         *   references: {
+         *     connectionIndicator: '#indicator',
+         *     description: 'body > .description'
+         *   },
+         *   properties: {
+         *     online: Boolean,
+         *     description: {
+         *       type: String,
+         *       default: 'No description available.'
+         *     }
+         *   },
+         *   states: {
+         *     default: (stateChange) => {
+         *       this.properties.description = 'Unknown'
+         *     },
+         *
+         *     offline: (stateChange) => {
+         *       if (stateChange.old !== 'offline') {
+         *         this.properties.description = 'No connection established.'
+         *       }
+         *
+         *       this.ref.connectionIndicator.classList.remove('online')
+         *     },
+         *
+         *     online: (stateChange) => {
+         *       if (stateChange.new === 'online') {
+         *         this.properties.description = 'Connection established to remote server.'
+         *       }
+         *
+         *       this.ref.connectionIndicator.classList.add('online')
+         *     }
+         *   },
+         *   initialState: 'offline',
+         *   reactions: {
+         *     connected: 'online',
+         *     disconnected: 'offline'
+         *   }
+         * })
+         *
+         * MyParentViewRegistry.state = 'connected'
+         *
+         * console.log(Registry.state) // Outputs "online"
+         * ```
+         *
+         * In this example, setting the #parent state to `connected`
+         * is detected by `Registry`, which reacts by setting its own
+         * state to `online`.
+         */
+        _reactions: NGN.private(NGN.coalesce(cfg.reactions))
       })
+
+      // Assure a default state method exists
+      if (!this._states.hasOwnProperty('default')) {
+        this._states['default'] = () => {} // No-op default
+      }
 
       // Create a self reference by Driver ID (inherited)
       NGN.ref.create(this.id, this.selector)
@@ -135,9 +281,69 @@ if (!NGN) {
         this._properties = new NGN.DATA.Model({
           fields: this.propertyFields
         })
+
+        this._properties.on('field.update', (change) => {
+          this.emit('property.changed', {
+            property: change.field,
+            old: change.old,
+            new: change.new
+          })
+        })
+
+        this._properties.on('field.create', (change) => {
+          this.emit('property.changed', {
+            property: change.field,
+            old: null,
+            new: NGN.coalesce(this._properties[change.field])
+          })
+        })
+
+        this._properties.on('field.delete', (change) => {
+          this.emit('property.changed', {
+            property: change.field,
+            old: change.value,
+            new: null
+          })
+        })
       }
 
-      if (this.initialstate !== this._state) {
+      // When properties change, re-apply the current state
+      this.on('property.changed', (change) => {
+        this._states[this.state].apply(this, {
+          old: this.state,
+          new: this.state,
+          reapplied: true
+        })
+      })
+
+      // Watch the parent, if it exists.
+      if (this._parent) {
+        // If a parent exists, bubble state & property events down the chain.
+        this._parent.on('state.changed', (state) => {
+          this.emit('parent.state.changed', state)
+        })
+
+        this._parent.on('property.changed', (change) => {
+          this.emit('parent.property.changed', change)
+        })
+      }
+
+      // React to changes in the parent view.
+      this.on('parent.state.changed', (state) => {
+        if (this.managesReaction(state.new)) {
+          this.state = this.reactions[state.new]
+        }
+      })
+
+      // Apply state changes
+      this.on('state.changed', (change) => {
+        if (this.managesState(NGN.coalesce(change.new, 'default'))) {
+          this._states[NGN.coalesce(change.new, 'default')].apply(this, change)
+        }
+      })
+
+      // Set the initial state.
+      if (this.initialstate !== this._state && this.managesState(this.initialstate)) {
         this.state = this.initialstate
       }
     }
@@ -151,6 +357,19 @@ if (!NGN) {
       return NGN.ref[this.id]
     }
 
+    /**
+     * @property {Object} reactions
+     * Retrieve the reactions defined in the configuration.
+     * @readonly
+     */
+    get reactions () {
+      return NGN.coalesce(this._reactions, {})
+    }
+
+    /**
+     * @property {String} state
+     * The current state of the view registry.
+     */
     get state () {
       return NGN.coalesce(this._state, 'default')
     }
@@ -168,6 +387,11 @@ if (!NGN) {
      * ```
      */
     set state (value) {
+      // If there is no change, don't update the state.
+      if (this.state === value) {
+        return
+      }
+
       let old = this.state
       this._state = value.toString().trim().toLowerCase()
 
@@ -176,7 +400,7 @@ if (!NGN) {
         new: this._state
       })
 
-      old = null
+      old = null // Facilitate garbage collection
     }
 
     /**
@@ -194,6 +418,67 @@ if (!NGN) {
     }
 
     /**
+     * @method managesState
+     * Indicates the view registry manages a specific state.
+     * @param {string} state
+     * The name of the state to check for.
+     * returns {boolean}
+     * @private
+     */
+    managesState (state) {
+      return this._states.hasOwnProperty(state) && typeof this._states[state] === 'function'
+    }
+
+    /**
+     * @method managesReaction
+     * Indicates the view registry manages a specific parent-child reaction.
+     * @param {string} parentState
+     * The name of the parent state to check for.
+     * returns {boolean}
+     * @private
+     */
+    managesReaction (state) {
+      return this._reactions.hasOwnProperty(state)
+    }
+
+    /**
+     * @method createReaction
+     * Add a new #reaction mapping dynamically.
+     * @param {string} parentState
+     * The parent state to react to.
+     * @param {string} reactionState
+     * The state to set when the parentState is recognized.
+     */
+    createReaction (source, target) {
+      if (!this._parent) {
+        console.warn('Cannot create a reaction to a parent view registry when no parent is configured.')
+        return
+      }
+
+      this._reactions[source] = target
+    }
+
+    /**
+     * @method removeReaction
+     * Remove a #reaction mapping dynamically.
+     * @param {string} parentState
+     * The parent state.
+     */
+    removeReaction (source) {
+      if (this._reactions.hasOwnProperty(source)) {
+        delete this._reactions[source]
+      }
+    }
+
+    /**
+     * @method clearReactions
+     * Remove all reactions.
+     */
+    clearReactions () {
+      this._reactions = null
+    }
+
+    /**
      * @method destroy
      * Destroy the DOM element associated with the ViewRegistry.
      * This does not affect any parent elements.
@@ -204,6 +489,31 @@ if (!NGN) {
       }
 
       NGN.DOM.destroy(this.self)
+    }
+
+    /**
+     * @method hide
+     * A helper method to hide the primary reference.
+     * This is accomplished by setting `display: none;`
+     * on the component matching the main #selector.
+     * The original `display` value is saved so the #show
+     * method can redisplay the element correctly.
+     */
+    hide () {
+      this.displaystate = this.self.styles.display
+      this.self.styles.display = 'none'
+    }
+
+    /**
+     * @method show
+     * A helper method to show the primary reference.
+     * This is accomplished by setting `display: <ORIGINAL_VALUE>;`
+     * on the component matching the main #selector. The original
+     * value is saved by the #hide method. If this method is called
+     * _before_ #hide is called, the display will be set to `''`.
+     */
+    show () {
+      this.self.styles.display = NGN.coalesce(this.displaystate, '')
     }
   }
 
