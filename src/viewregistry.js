@@ -1,5 +1,3 @@
-'use strict'
-
 if (!NGN) {
   console.error('NGN not found.')
 } else {
@@ -52,7 +50,7 @@ if (!NGN) {
    * is passed `some.event` instead of `mycomponent.some.event`.
    * @extends NGNX.Driver
    */
-  class ViewRegistry extends NGNX.Driver {
+  class ViewRegistry2 extends NGNX.Driver {
     constructor (cfg) {
       cfg = cfg || {}
 
@@ -278,11 +276,17 @@ if (!NGN) {
 
       // Initialize the properties store
       if (this.propertyFields !== null) {
-        let PropertyModel = new NGN.DATA.Model({
+        this._properties = (new NGN.DATA.Model({
           fields: this.propertyFields
-        })
+        })())
 
-        this._properties = new PropertyModel()
+        this._properties.on('field.update', (change) => {
+          this.emit('property.changed', {
+            property: change.field,
+            old: change.old,
+            new: change.new
+          })
+        })
 
         this._properties.on('field.create', (change) => {
           this.emit('property.changed', {
@@ -300,15 +304,6 @@ if (!NGN) {
           })
         })
       }
-
-      // When properties change, re-apply the current state
-      this.on('property.changed', (change) => {
-        this._states[this.state].apply(this, {
-          old: this.state,
-          new: this.state,
-          reapplied: true
-        })
-      })
 
       // Watch the parent, if it exists.
       if (this._parent) {
@@ -348,9 +343,7 @@ if (!NGN) {
 
       // Apply state changes
       this.on('state.changed', (change) => {
-        if (this.managesState(NGN.coalesce(change.new, 'default'))) {
-          this._states[NGN.coalesce(change.new, 'default')].apply(this, change)
-        }
+        this._states[NGN.coalesce(change.new, 'default')].apply(this, arguments)
       })
 
       // Set the initial state.
@@ -530,6 +523,6 @@ if (!NGN) {
     }
   }
 
-  NGNX.ViewRegistry = ViewRegistry
+  NGNX.ViewRegistry2 = ViewRegistry2
   // Object.defineProperty(NGNX, 'ViewRegistry', NGN.const(ViewRegistry))
 }
