@@ -278,9 +278,11 @@ if (!NGN) {
 
       // Initialize the properties store
       if (this.propertyFields !== null) {
-        this._properties = (new NGN.DATA.Model({
+        let PropertyModel = new NGN.DATA.Model({
           fields: this.propertyFields
-        })())
+        })
+
+        this._properties = new PropertyModel()
 
         this._properties.on('field.create', (change) => {
           this.emit('property.changed', {
