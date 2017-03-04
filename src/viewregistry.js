@@ -278,17 +278,9 @@ if (!NGN) {
 
       // Initialize the properties store
       if (this.propertyFields !== null) {
-        this._properties = new NGN.DATA.Model({
+        this._properties = (new NGN.DATA.Model({
           fields: this.propertyFields
-        })
-
-        this._properties.on('field.update', (change) => {
-          this.emit('property.changed', {
-            property: change.field,
-            old: change.old,
-            new: change.new
-          })
-        })
+        })())
 
         this._properties.on('field.create', (change) => {
           this.emit('property.changed', {
@@ -335,6 +327,23 @@ if (!NGN) {
         }
       })
 
+      // Apply scope warnings to all state handlers
+      for (let scope in this._states) {
+        let handlerFn = this._states[scope]
+        this._states[scope] = (change) => {
+          try {
+            handlerFn.apply(this, arguments)
+          } catch (e) {
+            let fnString = handlerFn.toString().toLowerCase()
+            if (fnString.indexOf('this.') >= 0 && fnString.indexOf('function') < 0) {
+              console.warn(`The %c${scope}%c state handler on line ${NGN.stack.pop().line} references the lexical %c\"this\"%c scope, which may be the cause of the error if the handler is defined as a fat arrow function. This can be resolved by using a real function instead of a fat arrow function.`, NGN.css, 'font-weight: 100;', NGN.css, 'font-weight: 100;')
+            }
+
+            throw e
+          }
+        }
+      }
+
       // Apply state changes
       this.on('state.changed', (change) => {
         if (this.managesState(NGN.coalesce(change.new, 'default'))) {
@@ -344,7 +353,9 @@ if (!NGN) {
 
       // Set the initial state.
       if (this.initialstate !== this._state && this.managesState(this.initialstate)) {
-        this.state = this.initialstate
+        NGNX.util.requeue(() => {
+          this.state = this.initialstate
+        })
       }
     }
 
@@ -438,7 +449,7 @@ if (!NGN) {
      * @private
      */
     managesReaction (state) {
-      return this._reactions.hasOwnProperty(state)
+      return this.reactions.hasOwnProperty(state)
     }
 
     /**
@@ -465,7 +476,7 @@ if (!NGN) {
      * The parent state.
      */
     removeReaction (source) {
-      if (this._reactions.hasOwnProperty(source)) {
+      if (this.reactions.hasOwnProperty(source)) {
         delete this._reactions[source]
       }
     }
