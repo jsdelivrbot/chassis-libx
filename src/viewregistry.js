@@ -50,7 +50,7 @@ if (!NGN) {
    * is passed `some.event` instead of `mycomponent.some.event`.
    * @extends NGNX.Driver
    */
-  class ViewRegistry2 extends NGNX.Driver {
+  class ViewRegistry extends NGNX.Driver {
     constructor (cfg) {
       cfg = cfg || {}
 
@@ -523,6 +523,6 @@ if (!NGN) {
     }
   }
 
-  NGNX.ViewRegistry2 = ViewRegistry2
+  NGNX.ViewRegistry = ViewRegistry
   // Object.defineProperty(NGNX, 'ViewRegistry', NGN.const(ViewRegistry))
 }
