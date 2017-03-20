@@ -398,6 +398,10 @@ if (!NGN) {
         return
       }
 
+      if (!this.managesState(value)) {
+        throw new Error(value + ' is not state managed by the ViewRegistry.')
+      }
+
       let old = this.state
       this._state = value.toString().trim().toLowerCase()
 
@@ -506,7 +510,7 @@ if (!NGN) {
      * method can redisplay the element correctly.
      */
     hide () {
-      this.displaystate = this.self.styles.display
+      this.displaystate = NGN.coalesce(this.self.styles.display)
       this.self.styles.display = 'none'
     }
 
