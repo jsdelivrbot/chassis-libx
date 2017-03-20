@@ -265,8 +265,83 @@ if (!NGN) {
          * is detected by `Registry`, which reacts by setting its own
          * state to `online`.
          */
-        _reactions: NGN.private(NGN.coalesce(cfg.reactions))
+        _reactions: NGN.private(NGN.coalesce(cfg.reactions)),
+
+        /**
+         * @cfg {Object|Array} reflexes
+         * Map arbitrary states (from a non-parent registry) to the
+         * registry #states. Multiple reflexes can be applied simultaneously by
+         * passing an array instead of a single object.
+         *
+         * Reflexes are a special kind of reaction. A _reaction_ responds
+         * to state changes in the #parent, whereas a _reflex_ responds to
+         * state changes in an arbitrary view registries.
+         *
+         * **Example**
+         *
+         * ```js
+         * let Registry = new NGNX.ViewRegistry({
+         *   parent: MyParentViewRegistry,
+         *   namespace: 'myscope.',
+         *   selector: '.path .to element',
+         *   references: {
+         *     connectionIndicator: '#indicator',
+         *     description: 'body > .description'
+         *   },
+         *   properties: {
+         *     online: Boolean,
+         *     description: {
+         *       type: String,
+         *       default: 'No description available.'
+         *     }
+         *   },
+         *   states: {
+         *     default: (stateChange) => {
+         *       this.properties.description = 'Unknown'
+         *     },
+         *
+         *     offline: (stateChange) => {
+         *       if (stateChange.old !== 'offline') {
+         *         this.properties.description = 'No connection established.'
+         *       }
+         *
+         *       this.ref.connectionIndicator.classList.remove('online')
+         *     },
+         *
+         *     online: (stateChange) => {
+         *       if (stateChange.new === 'online') {
+         *         this.properties.description = 'Connection established to remote server.'
+         *       }
+         *
+         *       this.ref.connectionIndicator.classList.add('online')
+         *     }
+         *   },
+         *   initialState: 'offline',
+         *   reactions: {
+         *     connected: 'online',
+         *     disconnected: 'offline'
+         *   },
+         *   reflexes: {
+         *     registry: someOtherRegistry,
+         *     reactions: {
+         *       pause: 'offline',
+         *       play: 'online'
+         *     }
+         *   }
+         * })
+         *
+         * someOtherRegistry.state = 'pause'
+         *
+         * console.log(Registry.state) // Outputs "offline"
+         * ```
+         */
+        _reflexes: NGN.private(NGN.coalesce(cfg.reflexes, []))
       })
+
+      // If reflexes exist as an object, convert to an array
+      if (!Array.isArray(this._reflexes)) {
+        this._reflexes = [this._reflexes]
+      }
 
       // Assure a default state method exists
       if (!this._states.hasOwnProperty('default')) {
@@ -326,6 +401,11 @@ if (!NGN) {
         }
       })
 
+      // Initialize Reflex Handlers
+      this._reflexes.forEach((reflex) => {
+        reflex.registry.on('state.changed', this.reflexHandler(reflex.registry))
+      })
+
       // Apply scope warnings to all state handlers
       for (let scope in this._states) {
         let handlerFn = this._states[scope]
@@ -383,8 +463,18 @@ if (!NGN) {
     }
 
     /**
+     * @property {Array} reflexes
+     * Retrieve the reflexes defined in the configuration.
+     * @readonly
+     */
+    get reflexes () {
+      return NGN.coalesce(this._reflexes, [])
+    }
+
+    /**
      * @property {String} previousState
      * The most recent prior state of the view registry.
+     * @readonly
      */
     get previousState () {
       return NGN.coalesce(this._previousstate, 'default')
@@ -502,6 +592,186 @@ if (!NGN) {
      */
     clearReactions () {
       this._reactions = null
+    }
+
+    /**
+     * @method managesReflex
+     * Indicates the view registry manages a specific registry-registry reaction (reflex).
+     * @param {NGNX.ViewRegistry} registry
+     * The registry whose state changes are observed.
+     * @param {string} state
+     * The registry state the reflex is responding to.
+     * returns {boolean}
+     * @private
+     */
+    managesReflex (registry, state) {
+      let reactions = this.getRegistryReflexReactions(registry)
+
+      return Object.keys(reactions).contains(state)
+    }
+
+    /**
+     * @class getRegistryReflex
+     * Returns a specific reflex.
+     * @param {NGNX.ViewRegistry} registry
+     * The registry to retrieve.
+     * @returns {Object}
+     * Returns a key/value object mimicking #reactions.
+     * @private
+     */
+    getRegistryReflex (registry) {
+      let reflexes = this.reflexes.filter((reflex) => {
+        return reflex.registry === registry
+      })
+
+      return reflexes.length === 1 ? reflexes[0] : {}
+    }
+
+    /**
+     * @class getRegistryReflexReactions
+     * Returns a specific reflex for the specified registry.
+     * @param {NGNX.ViewRegistry} registry
+     * The registry whose reactions are being requested.
+     * @returns {Object}
+     * Returns a key/value object mimicking #reactions.
+     * @private
+     */
+    getRegistryReflexReactions (registry) {
+      let reflexes = this.getRegistryReflex(registry)
+
+      return reflexes.length === 0 ? {} : reflexes.reactions
+    }
+
+    /**
+     * @method getRegistryReflexIndex
+     * Returns the index of the registry reflex within the #reflexes array.
+     * @param NGNX.ViewRegistry} registry
+     * The registry whose reactions are being requested.
+     * @returns {Nubmer}
+     * @private
+     */
+    getRegistryReflexIndex (registry) {
+      let index = -1
+
+      this.getRegistryReflex(registry).filter((reflex, i) => {
+        if (reflex.registry === registry) {
+          index = i
+          return true
+        }
+
+        return false
+      })
+
+      return index
+    }
+
+    /**
+     * @method createReflex
+     * Add a new #reflexes mapping dynamically.
+     * @param {NGNX.ViewRegistry} registry
+     * The registry to monitor for state changes.
+     * @param {string} sourceState
+     * The registry state to listen for.
+     * @param {string} reactionState
+     * The state to set when the sourceState is recognized.
+     */
+    createReflex (registry, source, target) {
+      if (!registry) {
+        console.warn('Cannot create a reflex because the source registry does not exist or could no be found.')
+        return
+      }
+
+      // Get any existing reactions
+      let reactions = this.getRegistryReflexReactions(registry)
+
+      // If the specified reactions already exist within the reflex, warn the user.
+      if (reactions.hasOwnProperty(source)) {
+        console.warn(`The "${registry.selector}" view registry reflex (${source} --> ${target}) was overridden.`)
+      }
+
+      // Append/overwrite the reflex reactions with the source and target.
+      reactions[source] = target
+
+      let reflex = {
+        registry,
+        reactions
+      }
+
+      // Replace the old reflex configuration with the new one.
+      let index = this.getRegistryReflexIndex(registry)
+
+      if (index >= 0) {
+        // Updating existing reflexes
+        this._reflexes = this._reflexes.splice(index, 1, reflex)
+      } else {
+        // Create a new reflex
+        this._reflexes.push(reflex)
+
+        // Add the registry listener
+        registry.on('state.changed', this.reflexHandler(registry))
+      }
+    }
+
+    /**
+     * @method removeReflex
+     * Remove a #reflexes mapping dynamically.
+     * @param {NGNX.ViewRegistry} registry
+     * The registry to monitor for state changes.
+     * @param {string} state
+     * The registry state to listen for.
+     */
+    removeReflex (registry, state) {
+      if (this.managesReflex(registry, state)) {
+        let reactions = this.getRegistryReflexReactions(registry)
+
+        // Remove the reaction
+        delete reactions[state]
+
+        // If this was the last reaction, remove the entire reflex registry
+        let index = this.getRegistryReflexIndex(registry)
+        if (Object.keys(reactions).length >= 0) {
+          // Modify reflex (not empty)
+          this._reflexes = this._reflexes.splice(index, 1)
+        } else {
+          // Remove empty reflex
+          this._reflexes = this._reflexes.splice(index, 1, {
+            registry,
+            reactions
+          })
+
+          // Remove orphaned event handler.
+          registry.off('state.changed', this.reflexHandler(registry))
+        }
+      }
+    }
+
+    /**
+     * @method clearReactions
+     * Remove all reactions.
+     */
+    clearReflexes () {
+      this._reflexes.forEach((reflex) => {
+        reflex.registry.off('state.changed', this.reflexHandler(reflex.registry))
+      })
+
+      this._reflexes = []
+    }
+
+    /**
+     * @method reflexHandler
+     * Respond to reflex events.
+     * @param {NGNX.ViewRegistry} registry
+     * The view registry to handle.
+     * @private
+     */
+    reflexHandler (registry) {
+      return (change) => {
+        let reactions = this.getRegistryReflexReactions(registry)
+
+        if (reactions.hasOwnProperty(registry.state)) {
+          this.state = reactions[registry.state]
+        }
+      }
     }
 
     /**
