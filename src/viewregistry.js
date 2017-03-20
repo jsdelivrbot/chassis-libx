@@ -197,6 +197,8 @@ if (!NGN) {
 
         displaystate: NGN.private(null),
 
+        _previousstate: NGN.private(null),
+
         /**
          * @cfg {string} [initialState=default]
          * Specify the initial state of the registry.
@@ -381,6 +383,14 @@ if (!NGN) {
     }
 
     /**
+     * @property {String} previousState
+     * The most recent prior state of the view registry.
+     */
+    get previousState () {
+      return NGN.coalesce(this._previousstate, 'default')
+    }
+
+    /**
      * @property {String} state
      * The current state of the view registry.
      */
@@ -410,15 +420,13 @@ if (!NGN) {
         throw new Error(value + ' is not state managed by the ViewRegistry.')
       }
 
-      let old = this.state
+      this._previousstate = this.state
       this._state = value.toString().trim().toLowerCase()
 
       this.emit('state.changed', {
-        old: old,
+        old: this._previousstate,
         new: this._state
       })
-
-      old = null // Facilitate garbage collection
     }
 
     /**
