@@ -522,7 +522,7 @@ if (!NGN) {
         this.displaystate = NGN.coalesce(this.self.style.display)
       }
 
-      this.self.styles.display = 'none'
+      this.self.style.display = 'none'
     }
 
     /**
