@@ -519,7 +519,7 @@ if (!NGN) {
      */
     hide () {
       if (this.self.style && this.self.style.display) {
-        this.displaystate = NGN.coalesce(this.self.styles.display)
+        this.displaystate = NGN.coalesce(this.self.style.display)
       }
 
       this.self.styles.display = 'none'
@@ -534,7 +534,7 @@ if (!NGN) {
      * _before_ #hide is called, the display will be set to `''`.
      */
     show () {
-      this.self.styles.display = NGN.coalesce(this.displaystate, '')
+      this.self.style.display = NGN.coalesce(this.displaystate, '')
     }
   }
 
