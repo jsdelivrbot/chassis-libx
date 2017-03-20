@@ -355,6 +355,14 @@ if (!NGN) {
     }
 
     /**
+     * @property {NGNX.ViewRegistry} parent
+     * Returns the parent registry or `null` if there is no parent.
+     */
+    get parent () {
+      return NGN.coalesce(this._parent)
+    }
+
+    /**
      * @property {NGN.ref} element
      * The NGN reference to the DOM #selector DOM element.
      * @readonly
