@@ -518,7 +518,10 @@ if (!NGN) {
      * method can redisplay the element correctly.
      */
     hide () {
-      this.displaystate = NGN.coalesce(this.self.styles.display)
+      if (this.self.style && this.self.style.display) {
+        this.displaystate = NGN.coalesce(this.self.styles.display)
+      }
+
       this.self.styles.display = 'none'
     }
 
