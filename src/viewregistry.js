@@ -49,6 +49,32 @@ if (!NGN) {
    * actually fires `mycomponent.some.event`. This is also why the `myReg.forward()`
    * is passed `some.event` instead of `mycomponent.some.event`.
    * @extends NGNX.Driver
+   * @fires property.changed
+   * Fired when a property has changed. Event handlers will receive an object argument
+   * that looks like:
+   * ```js
+   * {
+   *   property: 'property name',
+   *   old: 'old value',
+   *   new: 'new value'
+   * }
+   * ```
+   * @fires property.[field].changed
+   * Fired when a specific property has changed. Event handlers will receive an
+   * object argument that looks like:
+   * ```js
+   * {
+   *   old: 'old value',
+   *   new: 'new value'
+   * }
+   * ```
+   *
+   * For example, if a property called `title` exists, the
+   * event would be `property.title.changed`.
+   * @fires state.changed
+   * Triggered when the state of the registry has changed.
+   * @fires parent.state.changed
+   * Triggered when the state of the parent registry has changed.
    */
   class ViewRegistry extends NGNX.Driver {
     constructor (cfg) {
@@ -363,6 +389,11 @@ if (!NGN) {
             old: change.old,
             new: change.new
           })
+
+          this.emit(`property.${change.field}.changed`, {
+            old: change.old,
+            new: change.new
+          })
         })
 
         this._properties.on('field.create', (change) => {
@@ -371,11 +402,21 @@ if (!NGN) {
             old: null,
             new: NGN.coalesce(this._properties[change.field])
           })
+
+          this.emit(`property.${change.field}.changed`, {
+            old: null,
+            new: NGN.coalesce(this._properties[change.field])
+          })
         })
 
         this._properties.on('field.delete', (change) => {
           this.emit('property.changed', {
             property: change.field,
+            old: change.value,
+            new: null
+          })
+
+          this.emit(`property.${change.field}.changed`, {
             old: change.value,
             new: null
           })

@@ -85,7 +85,6 @@ test('NGNX.ViewRegistry Reflexes', function (t) {
     initialState: 'offline'
   })
 
-  // Child View Registry (Inherits from Parent)
   var RegB = new NGNX.ViewRegistry({
     selector: 'footer',
     namespace: 'regb.',
