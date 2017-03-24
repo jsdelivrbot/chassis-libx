@@ -508,6 +508,7 @@ if (!NGN) {
           // Async
           this._init(() => setTimeout(() => this.emit('initialized'), 0))
         } else {
+          this._init()
           setTimeout(() => this.emit('initialized'), 0)
         }
       } else {

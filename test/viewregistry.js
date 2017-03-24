@@ -112,7 +112,7 @@ test('NGNX.ViewRegistry Reflexes', function (t) {
   t.end()
 })
 
-test('Initialization', function (t) {
+test('Async Initialization', function (t) {
   var x = -1
 
   // Independent View Registry
@@ -131,6 +131,29 @@ test('Initialization', function (t) {
   })
 
   RegC.on('initialized', function () {
+    t.ok(x === 1, 'Initialization ran successfully.')
+    t.end()
+  })
+})
+
+test('Sync Initialization', function (t) {
+  var x = -1
+
+  // Independent View Registry
+  var RegD = new NGNX.ViewRegistry({
+    namespace: 'regd.',
+    selector: '.panel',
+    states: {
+      offline: function (change) {},
+      online: function (change) {}
+    },
+    init: function () {
+      x = 1
+    },
+    initialState: 'offline'
+  })
+
+  RegD.on('initialized', function () {
     t.ok(x === 1, 'Initialization ran successfully.')
     t.end()
   })
