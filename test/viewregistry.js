@@ -111,3 +111,27 @@ test('NGNX.ViewRegistry Reflexes', function (t) {
 
   t.end()
 })
+
+test('Initialization', function (t) {
+  var x = -1
+
+  // Independent View Registry
+  var RegC = new NGNX.ViewRegistry({
+    namespace: 'regc.',
+    selector: '.panel',
+    states: {
+      offline: function (change) {},
+      online: function (change) {}
+    },
+    init: function (next) {
+      x = 1
+      next()
+    },
+    initialState: 'offline'
+  })
+
+  RegC.on('initialized', () => {
+    t.ok(x === 1, 'Initialization ran successfully.')
+    t.end()
+  })
+})

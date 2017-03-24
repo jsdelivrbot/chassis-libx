@@ -361,7 +361,33 @@ if (!NGN) {
          * console.log(Registry.state) // Outputs "offline"
          * ```
          */
-        _reflexes: NGN.private(NGN.coalesce(cfg.reflexes, []))
+        _reflexes: NGN.private(NGN.coalesce(cfg.reflexes, [])),
+
+        /**
+         * @cfg {function} init
+         * Initialize the view registry by running this method before
+         * the initial state is set. This is useful for applying event
+         * listeners to DOM elements, performing operations before
+         * modifying visual layouts, or handling data before any other
+         * operations are performed.
+         *
+         * The init method will receive a single argument that can be used
+         * to asynchronously trigger the `initialized` event.
+         *
+         * ```js
+         * let MyReg = new NGNX.ViewRegistry({
+         *   selector: '.selector .path',
+         *   namespace: 'test.',
+         *   init: function (next) {
+         *     someAjaxCall(function (response) {
+         *       ... do something with response ...
+         *       next()
+         *     })
+         *   }
+         * })
+         * ```
+         */
+        _init: NGN.privateconst(NGN.coalesce(cfg.init))
       })
 
       // If reflexes exist as an object, convert to an array
@@ -474,6 +500,18 @@ if (!NGN) {
         NGNX.util.requeue(() => {
           this.state = this.initialstate
         })
+      }
+
+      // Optional Initialization
+      if (this._init) {
+        if (this._init.length === 1) {
+          // Async
+          this._init(() => setTimeout(() => this.emit('initialized'), 0))
+        } else {
+          setTimeout(() => this.emit('initialized'), 0)
+        }
+      } else {
+        setTimeout(() => this.emit('initialized'), 0)
       }
     }
 
