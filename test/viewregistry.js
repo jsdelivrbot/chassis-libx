@@ -130,7 +130,7 @@ test('Initialization', function (t) {
     initialState: 'offline'
   })
 
-  RegC.on('initialized', () => {
+  RegC.on('initialized', function () {
     t.ok(x === 1, 'Initialization ran successfully.')
     t.end()
   })
