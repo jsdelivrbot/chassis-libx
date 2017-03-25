@@ -387,7 +387,9 @@ if (!NGN) {
          * })
          * ```
          */
-        _init: NGN.privateconst(NGN.coalesce(cfg.init))
+        _init: NGN.privateconst(NGN.coalesce(cfg.init)),
+
+        _activeViewportState: NGN.private(null)
       })
 
       // If reflexes exist as an object, convert to an array
@@ -409,14 +411,16 @@ if (!NGN) {
           fields: this.propertyFields
         })())
 
-        this._properties.on('field.update', (change) => {
-          this.emit('property.changed', {
-            property: change.field,
+        this.on('property.changed', (change) => {
+          this.emit(`property.${change.property}.changed`, {
             old: change.old,
             new: change.new
           })
+        })
 
-          this.emit(`property.${change.field}.changed`, {
+        this._properties.on('field.update', (change) => {
+          this.emit('property.changed', {
+            property: change.field,
             old: change.old,
             new: change.new
           })
@@ -428,21 +432,11 @@ if (!NGN) {
             old: null,
             new: NGN.coalesce(this._properties[change.field])
           })
-
-          this.emit(`property.${change.field}.changed`, {
-            old: null,
-            new: NGN.coalesce(this._properties[change.field])
-          })
         })
 
         this._properties.on('field.delete', (change) => {
           this.emit('property.changed', {
             property: change.field,
-            old: change.value,
-            new: null
-          })
-
-          this.emit(`property.${change.field}.changed`, {
             old: change.value,
             new: null
           })
@@ -613,6 +607,68 @@ if (!NGN) {
       }
 
       return this._properties
+    }
+
+    /**
+     * @property {boolean} inViewport
+     * Determines whether the registry element (#selector) is in the viewport or not.
+     */
+    get inViewport () {
+      return this.isElementInViewport(this.self)
+    }
+
+    /**
+     * @method isElementInViewport
+     * Determines whether a DOM element is in the viewport or not.
+     * @param {HTMLElement} element
+     * The DOM element to check.
+     * @returns {boolean}
+     * @private
+     */
+    isElementInViewport (element) {
+      let rect = element.getBoundingClientRect()
+      return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+      )
+    }
+
+    /**
+     * @method enableScrollMonitor
+     * Enables scroll event monitoring on the window.
+     * This method enables `enterViewport` and `exitViewport` events.
+     */
+    enableScrollMonitor () {
+      this._activeViewportState = NGN.coalesce(this._activeViewportState, this.inViewport)
+      window.addEventListener('scroll', this.handleScrollEvent)
+    }
+
+    /**
+     * @method disableScrollMonitor
+     * Disables scroll event monitoring on the window.
+     * This method prevents `enterViewport` and `exitViewport` events from firing.
+     */
+    disableScrollMonitor () {
+      this._activeViewportState = null
+      window.removeEventListener('scroll', this.handleScrollEvent)
+    }
+
+    /**
+     * @method handleScrollEvent
+     * Responsible for determining when a DOM element is in the viewport
+     * and emitting an event when it changes (enter/exit viewport).
+     * @param {Event} scrollevent
+     * The scroll event.
+     * @private
+     */
+    handleScrollEvent (e) {
+      let inView = this.inViewport
+
+      if (this._activeViewportState !== inView) {
+        this.emit(inView ? 'enterViewport' : 'exitViewport', this.self)
+      }
     }
 
     /**
