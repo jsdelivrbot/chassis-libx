@@ -642,7 +642,7 @@ if (!NGN) {
      */
     enableScrollMonitor () {
       this._activeViewportState = NGN.coalesce(this._activeViewportState, this.inViewport)
-      window.addEventListener('scroll', this.handleScrollEvent)
+      window.addEventListener('scroll', (scrollEvent) => this.handleScrollEvent(scrollEvent))
     }
 
     /**
@@ -652,7 +652,7 @@ if (!NGN) {
      */
     disableScrollMonitor () {
       this._activeViewportState = null
-      window.removeEventListener('scroll', this.handleScrollEvent)
+      window.removeEventListener('scroll', (scrollEvent) => this.handleScrollEvent(scrollEvent))
     }
 
     /**
