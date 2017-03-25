@@ -495,24 +495,26 @@ if (!NGN) {
         this._states[NGN.coalesce(change.new, 'default')].apply(this, arguments)
       })
 
+      // Optional Initialization
+      if (this._init) {
+        if (this._init.length === 1) {
+          // Async
+          this._init(() => NGNX.util.requeue(() => this.emit('initialized')))
+        } else {
+          this._init()
+          NGNX.util.requeue(() => this.emit('initialized'))
+        }
+      } else {
+        NGNX.util.requeue(() => this.emit('initialized'))
+      }
+
       // Set the initial state.
       if (this.initialstate !== this._state && this.managesState(this.initialstate)) {
         NGNX.util.requeue(() => {
           this.state = this.initialstate
         })
-      }
-
-      // Optional Initialization
-      if (this._init) {
-        if (this._init.length === 1) {
-          // Async
-          this._init(() => setTimeout(() => this.emit('initialized'), 0))
-        } else {
-          this._init()
-          setTimeout(() => this.emit('initialized'), 0)
-        }
-      } else {
-        setTimeout(() => this.emit('initialized'), 0)
+      } else if (this._state === 'default') {
+        this._states.default()
       }
     }
 
