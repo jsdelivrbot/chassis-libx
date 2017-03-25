@@ -591,7 +591,7 @@ if (!NGN) {
       }
 
       this._previousstate = this.state
-      this._state = value.toString().trim().toLowerCase()
+      this._state = value.toString().trim()
 
       this.emit('state.changed', {
         old: this._previousstate,

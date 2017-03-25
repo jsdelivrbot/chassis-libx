@@ -37,7 +37,7 @@ test('NGNX.ViewRegistry Reactions', function (t) {
         this.properties.title = 'Offline'
       },
 
-      online: function (change) {
+      onLine: function (change) {
         this.properties.title = 'Online'
       }
     },
@@ -56,13 +56,13 @@ test('NGNX.ViewRegistry Reactions', function (t) {
 
     // Reactions automatically map parent state changes to the child
     reactions: {
-      online: 'connected',
+      onLine: 'connected',
       offline: 'disconnected'
     }
   })
 
   // Basic navigation
-  Connection.state = 'online'
+  Connection.state = 'onLine'
   t.ok(ConnectionNavigation.state === 'connected', 'Reaction cascades properly.')
   t.ok(Connection.properties.title === 'Online', 'Properties set properly.')
 
