@@ -85,10 +85,14 @@ if (!NGN) {
         throw new Error(`Invalid configuration. Expected Object, received ${typeof cfg}.`)
       }
 
+      cfg.selector = NGN.coalesce(cfg.selector, cfg.element)
+
       // Make sure the selector has been defined.
-      if (!cfg.hasOwnProperty('selector')) {
-        throw new Error('Missing required configuration attribute: selector')
+      if (cfg.selector === null) {
+        throw new Error('Missing required configuration attribute: element')
       }
+
+      cfg.selector = typeof cfg.selector === 'string' ? cfg.selector : NGN.DOM.selectorOfElement(cfg.selector)
 
       // Inherit from parent
       if (cfg.hasOwnProperty('parent')) {
@@ -131,9 +135,9 @@ if (!NGN) {
        */
       Object.defineProperties(this, {
         /**
-         * @cfg {string} selector (required)
-         * The CSS selector string of the DOM element to manage. This is used
-         * as the "root" of all NGN references & events.
+         * @cfg {string} element (required)
+         * The element or CSS selector string of the DOM element to manage.
+         * This is used as the "root" of all NGN references & events.
          */
         selector: NGN.const(cfg.selector),
 
@@ -614,7 +618,7 @@ if (!NGN) {
      * Determines whether the registry element (#selector) is in the viewport or not.
      */
     get inViewport () {
-      return this.isElementInViewport(this.self)
+      return this.elementInViewport(this.self)
     }
 
     /**
@@ -625,7 +629,7 @@ if (!NGN) {
      * @returns {boolean}
      * @private
      */
-    isElementInViewport (element) {
+    elementInViewport (element) {
       let rect = element.getBoundingClientRect()
       return (
         rect.top >= 0 &&
@@ -637,7 +641,7 @@ if (!NGN) {
 
     /**
      * @method enableScrollMonitor
-     * Enables scroll event monitoring on the window.
+     * Enables scroll monitoring associated with the #selector element.
      * This method enables `enterViewport` and `exitViewport` events.
      */
     enableScrollMonitor () {
@@ -647,7 +651,7 @@ if (!NGN) {
 
     /**
      * @method disableScrollMonitor
-     * Disables scroll event monitoring on the window.
+     * Disables scroll monitoring associated with the #selector element.
      * This method prevents `enterViewport` and `exitViewport` events from firing.
      */
     disableScrollMonitor () {
