@@ -2,8 +2,8 @@
 
 var test = require('tape')
 
-test('NGNX.ViewRegistry Sanity Checks', function (t) {
-  t.ok(NGNX.hasOwnProperty('ViewRegistry'), 'NGNX.ViewRegistry exists.')
+test('NGNX.VIEW.Registry Sanity Checks', function (t) {
+  t.ok(NGNX.VIEW.hasOwnProperty('Registry'), 'NGNX.VIEW.Registry exists.')
 
   var myReg
   try {

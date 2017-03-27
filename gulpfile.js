@@ -62,7 +62,8 @@ const common = [
   'state.js',
   'task.js',
   'taskrunner.js',
-  'viewregistry.js'
+  'viewregistry.js',
+  'viewcomponent.js'
 ]
 
 const minifyConfig = {

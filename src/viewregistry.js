@@ -4,7 +4,7 @@ if (!NGN) {
   window.NGNX = window.NGNX || {}
 
   /**
-   * @class NGNX.ViewRegistry
+   * @class NGNX.VIEW.Registry
    * A view registry is an organizational collection/grouping of events and
    * references that form the basis of a visual component. It is used to
    * break large applications into structured components that make sense to a
@@ -85,14 +85,16 @@ if (!NGN) {
         throw new Error(`Invalid configuration. Expected Object, received ${typeof cfg}.`)
       }
 
-      cfg.selector = NGN.coalesce(cfg.selector, cfg.element)
+      // cfg.selector = NGN.coalesce(cfg.selector, cfg.element)
 
       // Make sure the selector has been defined.
-      if (cfg.selector === null) {
-        throw new Error('Missing required configuration attribute: element')
+      if (!cfg.hasOwnProperty('selector')) {
+        throw new Error('Missing required configuration attribute: selector')
+      } else if (typeof cfg.selector !== 'string') {
+        throw new Error('Invalid selector configuration.')
       }
 
-      cfg.selector = typeof cfg.selector === 'string' ? cfg.selector : NGN.DOM.selectorOfElement(cfg.selector)
+      // cfg.selector = typeof cfg.selector === 'string' ? cfg.selector : NGN.DOM.selectorOfElement(cfg.selector)
 
       // Inherit from parent
       if (cfg.hasOwnProperty('parent')) {
@@ -958,6 +960,9 @@ if (!NGN) {
     }
   }
 
+  NGNX.VIEW = NGNX.VIEW || {}
+  NGNX.VIEW.Registry = ViewRegistry
   NGNX.ViewRegistry = ViewRegistry
+  // NGN.deprecate(NGNX.VIEW.Registry)
   // Object.defineProperty(NGNX, 'ViewRegistry', NGN.const(ViewRegistry))
 }
