@@ -963,14 +963,14 @@ if (!NGN) {
   NGNX.VIEW = NGNX.VIEW || {}
   NGNX.VIEW.Registry = ViewRegistry
 
-  class DeprecatedRegistry extends ViewRegistry {
-    constructor (cfg) {
-      console.warn('&cDEPRECATION NOTICE: %cNGNX.ViewRegistry is now NGNX.VIEW.Registry', NGN.css)
-
-      super(cfg)
+  class DeprecatedClass extends ViewRegistry {
+    constructor () {
+      console.warn('%cDEPRECATION NOTICE: %cNGNX.ViewRegistry is now NGNX.VIEW.Registry', NGN.css)
+      super(...arguments)
     }
   }
 
-  NGNX.ViewRegistry = DeprecatedRegistry
+  NGNX.ViewRegistry = DeprecatedClass
+  // NGNX.ViewRegistry = NGN.deprecateClass(ViewRegistry)
   // Object.defineProperty(NGNX, 'ViewRegistry', NGN.const(ViewRegistry))
 }

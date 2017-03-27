@@ -223,7 +223,7 @@ if (!NGN) {
          * GUID, assigned in realtime.
          * @private
          */
-        id: NGN.privateconst(NGN.coalesce(cfg.namespace, NGN.DATA.util.GUID()).replace(/[^A-Za-z0-9]/gi, ''))
+        id: NGN.privateconst(NGN.coalesce(cfg.id, cfg.namespace, NGN.DATA.util.GUID()).replace(/[^A-Za-z0-9]/gi, ''))
       })
 
       // Generate references

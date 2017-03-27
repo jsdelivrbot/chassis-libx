@@ -28,6 +28,9 @@ if (!NGNX) {
 
       cfg.selector = NGN.DOM.selectorOfElement(cfg.element, NGN.coalesce(cfg.parent, document.body))
 
+      cfg.id = NGN.coalesce(cfg.namespace, '')
+      cfg.id = (cfg.id.length > 0 ? '.' : '') + NGN.DATA.util.GUID() + '.'
+
       super(cfg)
     }
   }
