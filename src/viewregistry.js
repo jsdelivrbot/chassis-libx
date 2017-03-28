@@ -531,7 +531,13 @@ if (!NGN) {
 
       // Apply state changes
       this.on('state.changed', (change) => {
-        this._states[NGN.coalesce(change.new, 'default')].apply(this, arguments)
+        let newstate = NGN.coalesce(change.new, 'default')
+
+        if (!this._states.hasOwnProperty(newstate)) {
+          throw new Error(`Could not change from \"${change.old}\" to \"${newstate}\" state. \"${newstate}\" is not a valid state.`)
+        }
+
+        this._states[newstate].apply(this, arguments)
       })
 
       if (this.monitoring) {
