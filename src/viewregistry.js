@@ -420,11 +420,6 @@ if (!NGN) {
         this._reflexes = [this._reflexes]
       }
 
-      // Assure a default state method exists
-      if (!this._states.hasOwnProperty('default')) {
-        this._states['default'] = () => {} // No-op default
-      }
-
       // Create a self reference by Driver ID (inherited)
       NGN.ref.create(this.id, this.selector)
 
@@ -507,11 +502,6 @@ if (!NGN) {
         }
       }
 
-      // Apply state changes
-      this.on('state.changed', (change) => {
-        this._states[NGN.coalesce(change.new, 'default')].apply(this, arguments)
-      })
-
       // Optional Initialization
       if (this._init) {
         if (this._init.length === 1) {
@@ -525,6 +515,11 @@ if (!NGN) {
         NGNX.util.requeue(() => this.emit('initialized'))
       }
 
+      // Assure a default state method exists
+      if (!this._states.hasOwnProperty('default')) {
+        this._states['default'] = function () {} // No-op default
+      }
+
       // Set the initial state.
       if (this.initialstate !== this._state && this.managesState(this.initialstate)) {
         NGNX.util.requeue(() => {
@@ -533,6 +528,11 @@ if (!NGN) {
       } else if (this._state === 'default') {
         this._states.default()
       }
+
+      // Apply state changes
+      this.on('state.changed', (change) => {
+        this._states[NGN.coalesce(change.new, 'default')].apply(this, arguments)
+      })
 
       if (this.monitoring) {
         this.enableElementMonitor()
