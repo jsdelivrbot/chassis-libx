@@ -534,7 +534,9 @@ if (!NGN) {
         let newstate = NGN.coalesce(change.new, 'default')
 
         if (!this._states.hasOwnProperty(newstate)) {
-          throw new Error(`Could not change from \"${change.old}\" to \"${newstate}\" state. \"${newstate}\" is not a valid state.`)
+          console.warn(`Could not change from %c${change.old}%c to %c${newstate}%c state. %c${newstate}%c is not a valid state. Valid states include: %c${Object.keys(this._states).join(', ')}`, NGN.css, '', NGN.css, '', NGN.css, '', NGN.css)
+          console.info(NGN.stack)
+          throw new Error('Invalid state change.')
         }
 
         this._states[newstate].apply(this, arguments)
