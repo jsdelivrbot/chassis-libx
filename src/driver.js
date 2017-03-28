@@ -218,10 +218,9 @@ if (!NGN) {
         initialforwarders: NGN.privateconst(cfg.forward || null),
 
         /**
-         * @property {string} id
-         * A key to uniquely identify the driver. This is an auto-generated
-         * GUID, assigned in realtime.
-         * @private
+         * @cfgproperty {string} id
+         * A key to uniquely identify the driver. If unspecified, an auto-generated
+         * GUID is assigned in realtime.
          */
         id: NGN.privateconst(NGN.coalesce(cfg.id, cfg.namespace, NGN.DATA.util.GUID()).replace(/[^A-Za-z0-9]/gi, ''))
       })
@@ -258,6 +257,23 @@ if (!NGN) {
       }
     }
 
+    /**
+     * @property {object} references
+     * An alias of #ref.
+     * @readonly
+     */
+    get references () {
+      return this.ref
+    }
+
+    /**
+     * @property {Object} store
+     * Returns the #datastores associated with the Driver.
+     */
+    get store () {
+      return this.datastores
+    }
+
     // A helper event to initialize one-off events from the configuration.
     initializeOneOffEvent (eventName, handler, namespace = '') {
       if (typeof handler === 'function') {
@@ -267,15 +283,6 @@ if (!NGN) {
       Object.keys(handler).forEach((name) => {
         this.initializeOneOffEvent(name, handler[name], namespace + eventName + '.')
       })
-    }
-
-    /**
-     * @property {object} references
-     * An alias of #ref.
-     * @readonly
-     */
-    get references () {
-      return this.ref
     }
 
     /**
@@ -564,14 +571,6 @@ if (!NGN) {
       } else if (!suppress) {
         console.warn('Driver.scopeStoreEvents called without a defined namespace.')
       }
-    }
-
-    /**
-     * @property {Object} store
-     * Returns the #datastores associated with the Driver.
-     */
-    get store () {
-      return this.datastores
     }
 
     /**

@@ -26,10 +26,10 @@ if (!NGNX) {
         throw new Error('The specified element is a not a valid DOM element.')
       }
 
-      cfg.selector = NGN.DOM.selectorOfElement(cfg.element, NGN.coalesce(cfg.parent, document.body))
+      cfg.selector = NGN.DOM.getElementSelector(cfg.element, NGN.coalesce(cfg.parent, document.body))
 
-      cfg.id = NGN.coalesce(cfg.namespace, '')
-      cfg.id = (cfg.id.length > 0 ? '.' : '') + NGN.DATA.util.GUID() + '.'
+      cfg.namespace = NGN.coalesce(cfg.namespace, '')
+      cfg.namespace = (cfg.namespace.length > 0 ? '.' : '') + NGN.DATA.util.GUID() + '.'
 
       super(cfg)
     }

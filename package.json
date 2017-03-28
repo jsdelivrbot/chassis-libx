@@ -1,6 +1,6 @@
 {
   "name": "ngnx-chassis",
-  "version": "1.4.11",
+  "version": "1.4.12",
   "description": "The opininated 'extra' library for NGN.",
   "main": "index.js",
   "scripts": {
@@ -107,7 +107,8 @@
       "btoa",
       "localStorage",
       "Element",
-      "HTMLElement"
+      "HTMLElement",
+      "MutationObserver"
     ]
   }
 }

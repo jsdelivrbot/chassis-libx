@@ -75,6 +75,13 @@ if (!NGN) {
    * Triggered when the state of the registry has changed.
    * @fires parent.state.changed
    * Triggered when the state of the parent registry has changed.
+   * @fires element.removed
+   * Triggered when the element (#selector) is removed from the DOM.
+   * The old element is sent as the only argument to event handlers.
+   * @fires monitoring.enabled
+   * Triggered when DOM element monitoring becomes active.
+   * @fires monitoring.disabled
+   * Triggered when DOM element monitoring becomes inactive.
    */
   class ViewRegistry extends NGNX.Driver {
     constructor (cfg) {
@@ -142,6 +149,8 @@ if (!NGN) {
          * This is used as the "root" of all NGN references & events.
          */
         selector: NGN.const(cfg.selector),
+
+        _element: NGN.private(element),
 
         /**
          * @cfg {NGNX.ViewRegistry} parent
@@ -395,7 +404,15 @@ if (!NGN) {
          */
         _init: NGN.privateconst(NGN.coalesce(cfg.init)),
 
-        _activeViewportState: NGN.private(null)
+        _activeViewportState: NGN.private(null),
+
+        /**
+         * @cfg {Boolean} [monitor=false]
+         * Set this to `true` to trigger events when the element (#selector)
+         * is removed from the DOM.
+         */
+        monitoring: NGN.private(false),
+        _monitor: NGN.private(null) // Placeholder for mutation observer
       })
 
       // If reflexes exist as an object, convert to an array
@@ -515,6 +532,10 @@ if (!NGN) {
         })
       } else if (this._state === 'default') {
         this._states.default()
+      }
+
+      if (this.monitoring) {
+        this.enableElementMonitor()
       }
     }
 
@@ -674,6 +695,55 @@ if (!NGN) {
 
       if (this._activeViewportState !== inView) {
         this.emit(inView ? 'enterViewport' : 'exitViewport', this.self)
+      }
+    }
+
+    /**
+     * @method enableElementMonitor
+     * Enables element monitoring. This is the same as setting #monitor to `true`.
+     * @private
+     */
+    enableElementMonitor () {
+      this._monitor = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          // Make sure the element still exists (otherwise it was deleted permanently)
+          if (this._element) {
+            if (mutation.type === 'childList') {
+              setTimeout(() => {
+                for (let node = 0; node < mutation.addedNodes.length; node++) {
+                  if (mutation.removedNodes[node] === this._element) {
+                    this.emit('element.removed', mutation.removedNodes[node])
+                    this.disableElementMonitor()
+                    break
+                  }
+                }
+              }, 0)
+            }
+          }
+        })
+      })
+
+      this._monitor.observe(this._element.parentNode, {
+        childList: true
+      })
+
+      this.monitoring = true
+
+      this.emit('monitoring.enabled')
+    }
+
+    /**
+     * @method disableElementMonitor
+     * Disables element monitoring. This is the same as setting #monitor to `false`.
+     * @private
+     */
+    disableElementMonitor () {
+      this.monitoring = false
+
+      if (this._monitor) {
+        this._monitor.disconnect()
+        this._monitor = null
+        this.emit('monitoring.disabled')
       }
     }
 
@@ -962,15 +1032,6 @@ if (!NGN) {
 
   NGNX.VIEW = NGNX.VIEW || {}
   NGNX.VIEW.Registry = ViewRegistry
-
-  class DeprecatedClass extends ViewRegistry {
-    constructor () {
-      console.warn('%cDEPRECATION NOTICE: %cNGNX.ViewRegistry is now NGNX.VIEW.Registry', NGN.css)
-      super(...arguments)
-    }
-  }
-
-  NGNX.ViewRegistry = DeprecatedClass
-  // NGNX.ViewRegistry = NGN.deprecateClass(ViewRegistry)
+  NGNX.ViewRegistry = NGN.deprecateClass(NGNX.VIEW.Registry, 'NGNX.ViewRegistry is now NGNX.VIEW.Registry')
   // Object.defineProperty(NGNX, 'ViewRegistry', NGN.const(ViewRegistry))
 }
