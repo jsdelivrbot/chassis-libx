@@ -122,8 +122,6 @@ gulp.task('generate', function () {
     }
   }
 
-  const pkg = require('./package.json')
-
   common.forEach(function (filename) {
     tasks.add('Generating common file:' + filename, function (cont) {
       gulp.src(path.join(DIR.source, filename))
