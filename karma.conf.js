@@ -99,8 +99,7 @@ switch (mode) {
     customLaunchers.cl_edge_20 = {
       base: 'SauceLabs',
       browserName: 'microsoftedge',
-      platform: 'Windows 10',
-      version: '14'
+      platform: 'Windows 10'
     }
 
     console.log('Testing Browsers:')
