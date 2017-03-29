@@ -65,6 +65,13 @@ switch (mode) {
       }
     })
 
+    customLaunchers.cl_edge_20 = {
+      base: 'SauceLabs',
+      browserName: 'MicrosoftEdge',
+      platform: 'Windows 10',
+      version: '14.14393'
+    }
+
     if (useDistributionFiles) {
       customLaunchers.cl_safari_8 = {
         base: 'SauceLabs',
@@ -94,12 +101,6 @@ switch (mode) {
         platform: 'Windows 10',
         version: '11'
       }
-    }
-
-    customLaunchers.cl_edge_20 = {
-      base: 'SauceLabs',
-      browserName: 'microsoftedge',
-      platform: 'Windows 10'
     }
 
     console.log('Testing Browsers:')
@@ -163,8 +164,8 @@ var getFiles = function () {
   }
 
   // let allfiles = ['https://rawgit.com/ngnjs/cdn/master/chassis-lib/chassis.legacy.min.js']
-  // let allfiles = ['https://cdn.author.io/ngn/latest/chassis.legacy.min.js?cache=bust']
-  let allfiles = ['https://cdn.author.io/ngn/1.0.199/chassis.min.js']
+  let allfiles = ['https://cdn.author.io/ngn/latest/chassis.legacy.min.js?']
+  // let allfiles = ['https://cdn.author.io/ngn/1.0.199/chassis.min.js']
   allfiles = allfiles.concat(files)
   allfiles.push('test/*.js')
   allfiles.push({
