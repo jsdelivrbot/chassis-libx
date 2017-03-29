@@ -275,7 +275,9 @@ if (!NGN) {
     }
 
     // A helper event to initialize one-off events from the configuration.
-    initializeOneOffEvent (eventName, handler, namespace = '') {
+    initializeOneOffEvent (eventName, handler, namespace) {
+      namespace = NGN.coalesce(namespace, '')
+
       if (typeof handler === 'function') {
         return this.once(namespace + eventName, handler)
       }
