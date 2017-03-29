@@ -442,11 +442,13 @@ if (!NGN) {
         })
 
         this._properties.on('field.update', (change) => {
-          this.emit('property.changed', {
-            property: change.field,
-            old: change.old,
-            new: change.new
-          })
+          if (change.old !== change.new) {
+            this.emit('property.changed', {
+              property: change.field,
+              old: change.old,
+              new: change.new
+            })
+          }
         })
 
         this._properties.on('field.create', (change) => {
@@ -535,7 +537,7 @@ if (!NGN) {
         let newstate = NGN.coalesce(change.new, 'default')
 
         if (!this.managesState(newstate)) {
-          console.warn(`Could not change from%c ${change.old} %cto%c ${newstate}%c state.%c ${newstate}%c is not a valid state. Valid states include:%c ${Object.keys(this._states).join(', ')}`, NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css)
+          console.warn(`Could not change from%c ${change.old}%c to %c${newstate}%c state.%c ${newstate}%c is not a valid state. Valid states include:%c ${Object.keys(this._states).join(', ')}`, NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css)
           throw new Error('Invalid state change.')
         }
 
