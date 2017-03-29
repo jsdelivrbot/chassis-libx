@@ -523,7 +523,8 @@ if (!NGN) {
       // Set the initial state.
       if (this.initialstate !== this._state && this.managesState(this.initialstate)) {
         NGNX.util.requeue(() => {
-          this.state = this.initialstate
+          this._state = this.initialstate
+          this._states[this._state]()
         })
       } else if (this._state === 'default') {
         this._states.default()
@@ -534,7 +535,7 @@ if (!NGN) {
         let newstate = NGN.coalesce(change.new, 'default')
 
         if (!this.managesState(newstate)) {
-          console.warn(`Could not change from  %c${change.old}%c to  %c${newstate}%c state.  %c${newstate}%c is not a valid state. Valid states include: %c${Object.keys(this._states).join(', ')}`, NGN.css, '', NGN.css, '', NGN.css, '', NGN.css)
+          console.warn(`Could not change from%c ${change.old} %cto%c ${newstate}%c state.%c ${newstate}%c is not a valid state. Valid states include:%c ${Object.keys(this._states).join(', ')}`, NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css)
           throw new Error('Invalid state change.')
         }
 
