@@ -1,6 +1,6 @@
 {
   "name": "ngnx-chassis",
-  "version": "1.4.16",
+  "version": "1.4.17",
   "description": "The opininated 'extra' library for NGN.",
   "main": "index.js",
   "scripts": {
@@ -60,6 +60,7 @@
     "gulp": "3.9.1",
     "gulp-babel": "6.1.2",
     "gulp-concat": "^2.6.1",
+    "gulp-footer": "^1.0.5",
     "gulp-header": "^1.8.8",
     "gulp-sourcemaps": "^2.5.0",
     "gulp-uglify": "^2.1.2",

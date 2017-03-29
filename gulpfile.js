@@ -7,6 +7,7 @@ const uglify = require('gulp-uglify')
 const babel = require('gulp-babel')
 const cp = require('child_process')
 const header = require('gulp-header')
+const footer = require('gulp-footer')
 const sourcemaps = require('gulp-sourcemaps')
 const ShortBus = require('shortbus')
 const del = require('del')
@@ -83,7 +84,7 @@ const minifyConfig = {
 }
 
 const babelConfig = {
-  presets: ['es2015']
+  presets: ['es2015', 'es2017']
 }
 
 const expand = function (array) {
@@ -121,6 +122,8 @@ gulp.task('generate', function () {
     }
   }
 
+  const pkg = require('./package.json')
+
   common.forEach(function (filename) {
     tasks.add('Generating common file:' + filename, function (cont) {
       gulp.src(path.join(DIR.source, filename))
@@ -139,6 +142,7 @@ gulp.task('generate', function () {
     gulp.src(expand(common))
       .pipe(concat('chassis.x.dev.js'))
       .pipe(header(headerComment))
+      .pipe(footer(`Object.defineProperty(NGNX, 'version', NGN.const('${pkg.version}'))`))
       .pipe(gulp.dest(DIR.dist))
       .on('end', cont)
   })
@@ -149,6 +153,7 @@ gulp.task('generate', function () {
       .pipe(babel(babelConfig))
       .pipe(uglify(minifyConfig))
       .pipe(header(headerComment))
+      .pipe(footer(`Object.defineProperty(NGNX, 'version', NGN.const('${pkg.version}'))`))
       .pipe(sourcemaps.write('./sourcemaps', srcmapcfg))
       .pipe(gulp.dest(DIR.dist))
       .on('end', cont)
