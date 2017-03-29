@@ -55,9 +55,9 @@ if (!NGN) {
          * ```js
          * let Driver = new NGNX.Driver({
          *   references: {
-         *   	 buttons: 'body > button',
-         *   	 nav: 'body > header > nav:first-of-type',
-         *   	 input: '#myinput'
+         *     buttons: 'body > button',
+         *     nav: 'body > header > nav:first-of-type',
+         *     input: '#myinput'
          *   }
          * })
          *
@@ -84,13 +84,13 @@ if (!NGN) {
          * ```js
          * let DriverA = new NGNX.Driver({
          *   references: {
-         *   	 button: 'body > button' // <-- Difference
+         *     button: 'body > button' // <-- Difference
          *   }
          * })
          *
          * let DriverB = new NGNX.Driver({
          *   references: {
-         *   	 button: 'div > button' // <-- Difference
+         *     button: 'div > button' // <-- Difference
          *   }
          * })
          *
@@ -127,8 +127,8 @@ if (!NGN) {
          *
          * let Driver = new NGNX.Driver({
          *   datastores: {
-         *   	 a: MyStore,
-         *   	 b: MyOtherStore
+         *     a: MyStore,
+         *     b: MyOtherStore
          *   }
          * })
          *
@@ -519,8 +519,8 @@ if (!NGN) {
      * let Driver = new NGNX.Driver({
      *   namespace: 'myscope.', // <--- Notice the Driver scope!
      *   datastores: {
-     *   	 a: MyStore, // <-- "a" is the store reference name for MyStore
-     *   	 b: MyOtherStore // <-- "b" is the store reference name for MyOtherStore
+     *     a: MyStore, // <-- "a" is the store reference name for MyStore
+     *     b: MyOtherStore // <-- "b" is the store reference name for MyOtherStore
      *   }
      * })
      *
@@ -688,7 +688,7 @@ if (!NGN) {
      * })
      *
      * MyDriver.pool({
-     * 	 demo: function () {...}
+     *   demo: function () {...}
      * })
      *
      * // The above is equivalent to:

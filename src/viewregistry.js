@@ -494,7 +494,7 @@ if (!NGN) {
           } catch (e) {
             let fnString = handlerFn.toString().toLowerCase()
             if (fnString.indexOf('this.') >= 0 && fnString.indexOf('function') < 0) {
-              console.warn(`The %c${scope}%c state handler on line ${NGN.stack.pop().line} references the lexical %c\"this\"%c scope, which may be the cause of the error if the handler is defined as a fat arrow function. This can be resolved by using a real function instead of a fat arrow function.`, NGN.css, 'font-weight: 100;', NGN.css, 'font-weight: 100;')
+              console.warn(`The %c${scope}%c state handler on line ${NGN.stack.pop().line} references the lexical %cthis%c scope, which may be the cause of the error if the handler is defined as a fat arrow function. This can be resolved by using a real function instead of a fat arrow function.`, NGN.css, 'font-weight: 100;', NGN.css, 'font-weight: 100;')
             }
 
             throw e
