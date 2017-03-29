@@ -135,6 +135,10 @@ switch (mode) {
     if (process.argv.indexOf('--safari') >= 0) {
       _browser = 'Safari'
     }
+
+    if (process.argv.indexOf('--edge') >= 0) {
+      _browser = 'Edge'
+    }
     break
 }
 
@@ -160,7 +164,8 @@ var getFiles = function () {
   }
 
   // let allfiles = ['https://rawgit.com/ngnjs/cdn/master/chassis-lib/chassis.legacy.min.js']
-  let allfiles = ['https://cdn.author.io/ngn/latest/chassis.legacy.min.js']
+  // let allfiles = ['https://cdn.author.io/ngn/latest/chassis.legacy.min.js?cache=bust']
+  let allfiles = ['https://cdn.author.io/ngn/1.0.199/chassis.min.js']
   allfiles = allfiles.concat(files)
   allfiles.push('test/*.js')
   allfiles.push({
