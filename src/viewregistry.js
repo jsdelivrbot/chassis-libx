@@ -83,7 +83,7 @@ if (!NGN) {
    * @fires monitoring.disabled
    * Triggered when DOM element monitoring becomes inactive.
    */
-  class View Registry extends NGNX.Driver {
+  class ViewRegistry extends NGNX.Driver {
     constructor (cfg) {
       cfg = cfg || {}
 
@@ -1038,7 +1038,7 @@ if (!NGN) {
   }
 
   NGNX.VIEW = NGNX.VIEW || {}
-  NGNX.VIEW.Registry = View Registry
-  NGNX.VIEW.Registry = NGN.deprecateClass(NGNX.VIEW.Registry, 'NGNX.VIEW.Registry is now NGNX.VIEW.Registry')
+  NGNX.VIEW.Registry = ViewRegistry
+  NGNX.ViewRegistry = NGN.deprecateClass(NGNX.VIEW.Registry, 'NGNX.ViewRegistry is now NGNX.VIEW.Registry')
   // Object.defineProperty(NGNX, 'View Registry', NGN.const(View Registry))
 }
