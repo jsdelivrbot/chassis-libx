@@ -23,7 +23,7 @@ if (!NGN) {
    * **Example:**
    *
    * ```js
-   * let myReg = new NGNX.ViewRegistry({
+   * let myReg = new NGNX.VIEW.Registry({
    *   namespace: 'mycomponent.',
    *   selector: 'body main .mycomponent'
    * })
@@ -83,7 +83,7 @@ if (!NGN) {
    * @fires monitoring.disabled
    * Triggered when DOM element monitoring becomes inactive.
    */
-  class ViewRegistry extends NGNX.Driver {
+  class View Registry extends NGNX.Driver {
     constructor (cfg) {
       cfg = cfg || {}
 
@@ -138,7 +138,7 @@ if (!NGN) {
       super(cfg)
 
       /**
-       * @cfg {NGNX.ViewRegistry} [parent]
+       * @cfg {NGNX.VIEW.Registry} [parent]
        * The parent View Registry. This optional configuration is commonly used
        * to break large registries into smaller/more managable registries.
        */
@@ -153,7 +153,7 @@ if (!NGN) {
         _element: NGN.private(element),
 
         /**
-         * @cfg {NGNX.ViewRegistry} parent
+         * @cfg {NGNX.VIEW.Registry} parent
          * A parent registry. This identifies the view registry
          * as a child of another.
          */
@@ -177,7 +177,7 @@ if (!NGN) {
          * **Example**
          *
          * ```js
-         * let Registry = new NGNX.ViewRegistry({
+         * let Registry = new NGNX.VIEW.Registry({
          *   namespace: 'myscope.',
          *   selector: '.path .to element',
          *   references: {
@@ -254,8 +254,8 @@ if (!NGN) {
          * **Example**
          *
          * ```js
-         * let Registry = new NGNX.ViewRegistry({
-         *   parent: MyParentViewRegistry,
+         * let Registry = new NGNX.VIEW.Registry({
+         *   parent: MyParentView Registry,
          *   namespace: 'myscope.',
          *   selector: '.path .to element',
          *   references: {
@@ -297,7 +297,7 @@ if (!NGN) {
          *   }
          * })
          *
-         * MyParentViewRegistry.state = 'connected'
+         * MyParentView Registry.state = 'connected'
          *
          * console.log(Registry.state) // Outputs "online"
          * ```
@@ -321,8 +321,8 @@ if (!NGN) {
          * **Example**
          *
          * ```js
-         * let Registry = new NGNX.ViewRegistry({
-         *   parent: MyParentViewRegistry,
+         * let Registry = new NGNX.VIEW.Registry({
+         *   parent: MyParentView Registry,
          *   namespace: 'myscope.',
          *   selector: '.path .to element',
          *   references: {
@@ -390,7 +390,7 @@ if (!NGN) {
          * to asynchronously trigger the `initialized` event.
          *
          * ```js
-         * let MyReg = new NGNX.ViewRegistry({
+         * let MyReg = new NGNX.VIEW.Registry({
          *   selector: '.selector .path',
          *   namespace: 'test.',
          *   init: function (next) {
@@ -414,6 +414,11 @@ if (!NGN) {
         monitoring: NGN.private(false),
         _monitor: NGN.private(null) // Placeholder for mutation observer
       })
+
+      // Assure a default state method exists
+      if (!this._states.hasOwnProperty('default')) {
+        this._states['default'] = function () {} // No-op default
+      }
 
       // If reflexes exist as an object, convert to an array
       if (!Array.isArray(this._reflexes)) {
@@ -515,11 +520,6 @@ if (!NGN) {
         NGNX.util.requeue(() => this.emit('initialized'))
       }
 
-      // Assure a default state method exists
-      if (!this._states.hasOwnProperty('default')) {
-        this._states['default'] = function () {} // No-op default
-      }
-
       // Set the initial state.
       if (this.initialstate !== this._state && this.managesState(this.initialstate)) {
         NGNX.util.requeue(() => {
@@ -533,9 +533,8 @@ if (!NGN) {
       this.on('state.changed', (change) => {
         let newstate = NGN.coalesce(change.new, 'default')
 
-        if (!this._states.hasOwnProperty(newstate)) {
-          console.warn(`Could not change from %c${change.old}%c to %c${newstate}%c state. %c${newstate}%c is not a valid state. Valid states include: %c${Object.keys(this._states).join(', ')}`, NGN.css, '', NGN.css, '', NGN.css, '', NGN.css)
-          console.info(NGN.stack)
+        if (!this.managesState(newstate)) {
+          console.warn(`Could not change from  %c${change.old}%c to  %c${newstate}%c state.  %c${newstate}%c is not a valid state. Valid states include: %c${Object.keys(this._states).join(', ')}`, NGN.css, '', NGN.css, '', NGN.css, '', NGN.css)
           throw new Error('Invalid state change.')
         }
 
@@ -548,7 +547,7 @@ if (!NGN) {
     }
 
     /**
-     * @property {NGNX.ViewRegistry} parent
+     * @property {NGNX.VIEW.Registry} parent
      * Returns the parent registry or `null` if there is no parent.
      */
     get parent () {
@@ -618,7 +617,7 @@ if (!NGN) {
       }
 
       if (!this.managesState(value)) {
-        throw new Error(value + ' is not state managed by the ViewRegistry.')
+        throw new Error(value + ' is not state managed by the View Registry.')
       }
 
       this._previousstate = this.state
@@ -819,7 +818,7 @@ if (!NGN) {
     /**
      * @method managesReflex
      * Indicates the view registry manages a specific registry-registry reaction (reflex).
-     * @param {NGNX.ViewRegistry} registry
+     * @param {NGNX.VIEW.Registry} registry
      * The registry whose state changes are observed.
      * @param {string} state
      * The registry state the reflex is responding to.
@@ -835,7 +834,7 @@ if (!NGN) {
     /**
      * @class getRegistryReflex
      * Returns a specific reflex.
-     * @param {NGNX.ViewRegistry} registry
+     * @param {NGNX.VIEW.Registry} registry
      * The registry to retrieve.
      * @returns {Object}
      * Returns a key/value object mimicking #reactions.
@@ -852,7 +851,7 @@ if (!NGN) {
     /**
      * @class getRegistryReflexReactions
      * Returns a specific reflex for the specified registry.
-     * @param {NGNX.ViewRegistry} registry
+     * @param {NGNX.VIEW.Registry} registry
      * The registry whose reactions are being requested.
      * @returns {Object}
      * Returns a key/value object mimicking #reactions.
@@ -867,7 +866,7 @@ if (!NGN) {
     /**
      * @method getRegistryReflexIndex
      * Returns the index of the registry reflex within the #reflexes array.
-     * @param NGNX.ViewRegistry} registry
+     * @param NGNX.VIEW.Registry} registry
      * The registry whose reactions are being requested.
      * @returns {Nubmer}
      * @private
@@ -890,7 +889,7 @@ if (!NGN) {
     /**
      * @method createReflex
      * Add a new #reflexes mapping dynamically.
-     * @param {NGNX.ViewRegistry} registry
+     * @param {NGNX.VIEW.Registry} registry
      * The registry to monitor for state changes.
      * @param {string} sourceState
      * The registry state to listen for.
@@ -937,7 +936,7 @@ if (!NGN) {
     /**
      * @method removeReflex
      * Remove a #reflexes mapping dynamically.
-     * @param {NGNX.ViewRegistry} registry
+     * @param {NGNX.VIEW.Registry} registry
      * The registry to monitor for state changes.
      * @param {string} state
      * The registry state to listen for.
@@ -982,7 +981,7 @@ if (!NGN) {
     /**
      * @method reflexHandler
      * Respond to reflex events.
-     * @param {NGNX.ViewRegistry} registry
+     * @param {NGNX.VIEW.Registry} registry
      * The view registry to handle.
      * @private
      */
@@ -998,7 +997,7 @@ if (!NGN) {
 
     /**
      * @method destroy
-     * Destroy the DOM element associated with the ViewRegistry.
+     * Destroy the DOM element associated with the View Registry.
      * This does not affect any parent elements.
      */
     destroy () {
@@ -1039,7 +1038,7 @@ if (!NGN) {
   }
 
   NGNX.VIEW = NGNX.VIEW || {}
-  NGNX.VIEW.Registry = ViewRegistry
-  NGNX.ViewRegistry = NGN.deprecateClass(NGNX.VIEW.Registry, 'NGNX.ViewRegistry is now NGNX.VIEW.Registry')
-  // Object.defineProperty(NGNX, 'ViewRegistry', NGN.const(ViewRegistry))
+  NGNX.VIEW.Registry = View Registry
+  NGNX.VIEW.Registry = NGN.deprecateClass(NGNX.VIEW.Registry, 'NGNX.VIEW.Registry is now NGNX.VIEW.Registry')
+  // Object.defineProperty(NGNX, 'View Registry', NGN.const(View Registry))
 }
