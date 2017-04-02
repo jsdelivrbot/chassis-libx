@@ -65,6 +65,13 @@ switch (mode) {
       }
     })
 
+    customLaunchers.cl_edge_20 = {
+      base: 'SauceLabs',
+      browserName: 'MicrosoftEdge',
+      platform: 'Windows 10',
+      version: '14.14393'
+    }
+
     if (useDistributionFiles) {
       customLaunchers.cl_safari_8 = {
         base: 'SauceLabs',
@@ -107,13 +114,6 @@ switch (mode) {
         platform: 'Windows 7',
         version: '50'
       }
-    }
-
-    customLaunchers.cl_edge_20 = {
-      base: 'SauceLabs',
-      browserName: 'MicrosoftEdge',
-      platform: 'Windows 10',
-      version: '14.14393'
     }
 
     console.log('Testing Browsers:')
@@ -186,6 +186,8 @@ var getFiles = function () {
     served: true,
     nocache: true
   })
+
+  console.log('Including Files:\n', allfiles)
 
   return allfiles
 }
