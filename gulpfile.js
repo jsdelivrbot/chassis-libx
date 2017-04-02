@@ -63,8 +63,8 @@ const common = [
   'state.js',
   'task.js',
   'taskrunner.js',
-  'viewregistry.js',
-  'viewcomponent.js'
+  'view/registry.js',
+  'view/component.js'
 ]
 
 const minifyConfig = {
@@ -135,19 +135,20 @@ gulp.task('generate', function () {
     })
   })
 
-  // Generate full project
-  tasks.add('Generating debug version: chassis.x.dev.js', function (cont) {
+  // Generate debug library
+  tasks.add('Generating debug version: debug.js', function (cont) {
     gulp.src(expand(common))
-      .pipe(concat('chassis.x.dev.js'))
+      .pipe(concat('debug.js'))
       .pipe(header(headerComment))
       .pipe(footer(`Object.defineProperty(NGNX, 'version', NGN.const('${pkg.version}'))`))
       .pipe(gulp.dest(DIR.dist))
       .on('end', cont)
   })
 
-  tasks.add('Generate full library: chassis.x.min.js', function (cont) {
+  // Generate production library
+  tasks.add('Generate production library: complete.min.js', function (cont) {
     return gulp.src(expand(common))
-      .pipe(concat('chassis.x.min.js'))
+      .pipe(concat('complete.min.js'))
       .pipe(babel(babelConfig))
       .pipe(uglify(minifyConfig))
       .pipe(header(headerComment))
