@@ -147,7 +147,7 @@ var getFiles = function () {
 
   if (useDistributionFiles) {
     files = [
-      'dist/chassis.x.min.js'
+      'dist/complete.min.js'
     ]
   } else {
     files = [
