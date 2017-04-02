@@ -7,13 +7,13 @@ test('NGNX.VIEW.Registry Sanity Checks', function (t) {
 
   var myReg
   try {
-    myReg = new NGNX.ViewRegistry()
+    myReg = new NGNX.VIEW.Registry()
     t.fail('Instantiated with bad configuration.')
   } catch (e) {
     t.pass('Bad configuration throws an error.')
   }
 
-  myReg = new NGNX.ViewRegistry({
+  myReg = new NGNX.VIEW.Registry({
     selector: '#test1'
   })
 
@@ -22,11 +22,11 @@ test('NGNX.VIEW.Registry Sanity Checks', function (t) {
   t.end()
 })
 
-test('NGNX.ViewRegistry Reactions', function (t) {
+test('NGNX.VIEW.Registry Reactions', function (t) {
   document.body.insertAdjacentHTML('beforeend', '<div class="panel"><footer></footer></div>')
 
   // Main View Registry
-  var Connection = new NGNX.ViewRegistry({
+  var Connection = new NGNX.VIEW.Registry({
     namespace: 'connection.',
     selector: '.panel',
     properties: {
@@ -45,7 +45,7 @@ test('NGNX.ViewRegistry Reactions', function (t) {
   })
 
   // Child View Registry (Inherits from Parent)
-  var ConnectionNavigation = new NGNX.ViewRegistry({
+  var ConnectionNavigation = new NGNX.VIEW.Registry({
     parent: Connection,
     selector: 'footer',
     namespace: 'navigation.',
@@ -73,9 +73,9 @@ test('NGNX.ViewRegistry Reactions', function (t) {
   t.end()
 })
 
-test('NGNX.ViewRegistry Reflexes', function (t) {
+test('NGNX.VIEW.Registry Reflexes', function (t) {
   // Independent View Registry
-  var RegA = new NGNX.ViewRegistry({
+  var RegA = new NGNX.VIEW.Registry({
     namespace: 'rega.',
     selector: '.panel',
     states: {
@@ -85,7 +85,7 @@ test('NGNX.ViewRegistry Reflexes', function (t) {
     initialState: 'offline'
   })
 
-  var RegB = new NGNX.ViewRegistry({
+  var RegB = new NGNX.VIEW.Registry({
     selector: 'footer',
     namespace: 'regb.',
     states: {
@@ -116,7 +116,7 @@ test('Async Initialization', function (t) {
   var x = -1
 
   // Independent View Registry
-  var RegC = new NGNX.ViewRegistry({
+  var RegC = new NGNX.VIEW.Registry({
     namespace: 'regc.',
     selector: '.panel',
     states: {
@@ -140,7 +140,7 @@ test('Sync Initialization', function (t) {
   var x = -1
 
   // Independent View Registry
-  var RegD = new NGNX.ViewRegistry({
+  var RegD = new NGNX.VIEW.Registry({
     namespace: 'regd.',
     selector: '.panel',
     states: {
@@ -157,4 +157,24 @@ test('Sync Initialization', function (t) {
     t.ok(x === 1, 'Initialization ran successfully.')
     t.end()
   })
+})
+
+test('Extended References (Generated Names via Nesting)', function (t) {
+  var RegD = new NGNX.VIEW.Registry({
+    namespace: 'regd.',
+    selector: '.panel',
+    references: {
+      a: {
+        d: {
+          o: {
+            g: '.test'
+          },
+          e: '.test'
+        }
+      }
+    }
+  })
+
+  t.ok(RegD.ref.hasOwnProperty('aDOG'), 'Properly generated name.')
+  t.end()
 })

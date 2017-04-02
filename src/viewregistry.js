@@ -123,6 +123,26 @@ if (!NGN) {
 
       // If there are references, scope them according to the selector.
       if (cfg.hasOwnProperty('references')) {
+        // let refMap = cfg.references
+        const flattenReferences = function (cfg, namespace = '', additionalReferences) {
+          let refs = NGN.coalesce(additionalReferences, {})
+
+          Object.keys(cfg).forEach((key) => {
+            let capitalizedKey = `${key.substr(0, 1).toUpperCase()}${key.substr(1, key.length)}`
+            let ns = namespace !== '' ? `${namespace}${capitalizedKey}` : key
+
+            if (typeof cfg[key] === 'object') {
+              flattenReferences(cfg[key], ns, refs)
+            } else if (typeof cfg[key] === 'string') {
+              refs[ns] = cfg[key]
+            }
+          })
+
+          return refs
+        }
+
+        cfg.references = flattenReferences(cfg.references)
+
         Object.keys(cfg.references).forEach((r) => {
           cfg.references[r] = `${cfg.selector} ${cfg.references[r]}`
         })
@@ -413,6 +433,8 @@ if (!NGN) {
          */
         monitoring: NGN.private(false),
         _monitor: NGN.private(null) // Placeholder for mutation observer
+
+        // refMap: NGN.privateconst(NGN.coalesce(refMap, null))
       })
 
       // Assure a default state method exists
@@ -630,6 +652,15 @@ if (!NGN) {
         old: this._previousstate,
         new: this._state
       })
+    }
+
+    /**
+     * @property {Array} states
+     * A list of states managed by the view registry.
+     * @readonly
+     */
+    get states () {
+      return Object.keys(this._states)
     }
 
     /**
