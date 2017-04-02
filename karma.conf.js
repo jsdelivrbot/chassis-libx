@@ -65,13 +65,6 @@ switch (mode) {
       }
     })
 
-    customLaunchers.cl_edge_20 = {
-      base: 'SauceLabs',
-      browserName: 'MicrosoftEdge',
-      platform: 'Windows 10',
-      version: '14.14393'
-    }
-
     if (useDistributionFiles) {
       customLaunchers.cl_safari_8 = {
         base: 'SauceLabs',
@@ -87,13 +80,12 @@ switch (mode) {
         version: '9'
       }
 
-      // console.log('  - IE 10')
-      // customLaunchers.cl_ie_10 = {
-      //   base: 'SauceLabs',
-      //   browserName: 'internet explorer',
-      //   platform: 'Windows 8',
-      //   version: '10'
-      // }
+      customLaunchers.cl_safari_10 = {
+        base: 'SauceLabs',
+        browserName: 'safari',
+        platform: 'OS X 10.12',
+        version: '10'
+      }
 
       customLaunchers.cl_ie_11 = {
         base: 'SauceLabs',
@@ -101,6 +93,27 @@ switch (mode) {
         platform: 'Windows 10',
         version: '11'
       }
+
+      customLaunchers.cl_chrome_45 = {
+        base: 'SauceLabs',
+        browserName: 'chrome',
+        platform: 'Windows 7',
+        version: '45'
+      }
+
+      customLaunchers.cl_firefox_50 = {
+        base: 'SauceLabs',
+        browserName: 'firefox',
+        platform: 'Windows 7',
+        version: '50'
+      }
+    }
+
+    customLaunchers.cl_edge_20 = {
+      base: 'SauceLabs',
+      browserName: 'MicrosoftEdge',
+      platform: 'Windows 10',
+      version: '14.14393'
     }
 
     console.log('Testing Browsers:')
