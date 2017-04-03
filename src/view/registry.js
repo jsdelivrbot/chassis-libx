@@ -554,18 +554,6 @@ if (!NGN) {
         this._states.default()
       }
 
-      // Apply state changes
-      this.on('state.changed', (change) => {
-        let newstate = NGN.coalesce(change.new, 'default')
-
-        if (!this.managesState(newstate)) {
-          console.warn(`Could not change from%c ${change.old}%c to %c${newstate}%c state.%c ${newstate}%c is not a valid state. Valid states include:%c ${Object.keys(this._states).join(', ')}`, NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css)
-          throw new Error('Invalid state change.')
-        }
-
-        this._states[newstate].apply(this, arguments)
-      })
-
       if (this.monitoring) {
         this.enableElementMonitor()
       }
@@ -636,22 +624,31 @@ if (!NGN) {
      * ```
      */
     set state (value) {
+      value = NGN.coalesce(value, this.initialstate, 'default')
+
       // If there is no change, don't update the state.
       if (this.state === value) {
         return
       }
 
       if (!this.managesState(value)) {
+        console.warn(`Could not change from%c ${this.state}%c to %c${value}%c state.%c ${value}%c is not a valid state. Valid states include:%c ${Object.keys(this._states).join(', ')}`, NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css)
         throw new Error(value + ' is not state managed by the View Registry.')
       }
 
       this._previousstate = this.state
       this._state = value.toString().trim()
 
-      this.emit('state.changed', {
+      let change = {
         old: this._previousstate,
         new: this._state
-      })
+      }
+
+      // Apply state changes
+      this._states[this._state](change)
+      this.emit('state.changed', change)
+
+      change = null
     }
 
     /**
@@ -797,7 +794,7 @@ if (!NGN) {
      * @private
      */
     managesState (state) {
-      return this._states.hasOwnProperty(state) && typeof this._states[state] === 'function'
+      return this._states.hasOwnProperty(state) && NGN.isFn(this._states[state])
     }
 
     /**
