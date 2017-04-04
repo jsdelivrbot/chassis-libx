@@ -458,7 +458,8 @@ if (!NGN) {
     }
 
     templateRendered (element) {
-      NGN.BUS.emit(this.scope + 'template.render', element)
+      NGN.BUS.emit(this.scope + 'template.rendered', element)
+      NGN.BUS.emit('template.rendered', element)
       NGN.BUS.emit('template.render', element)
     }
 
@@ -608,6 +609,12 @@ if (!NGN) {
      * The handler function that responds to the event.
      */
     on () {
+      if (arguments.length > 0) {
+        if (arguments[0] === 'template.render') {
+          console.warn('%cDEPRECATION NOTICE:%c "template.render" event is now "template.rendered"', NGN.css, '')
+        }
+      }
+
       NGN.BUS.on.apply(NGN.BUS, this.applyNamespace(arguments))
     }
 
@@ -620,6 +627,12 @@ if (!NGN) {
      * The handler function that responds to the event.
      */
     once () {
+      if (arguments.length > 0) {
+        if (arguments[0] === 'template.render') {
+          console.warn('%cDEPRECATION NOTICE:%c "template.render" event is now "template.rendered"', NGN.css, '')
+        }
+      }
+
       NGN.BUS.once.apply(NGN.BUS, this.applyNamespace(arguments))
     }
 

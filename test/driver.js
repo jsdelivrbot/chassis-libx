@@ -48,7 +48,7 @@ test('NGNX.Driver', function (t) {
     })
 
     MyController.pool('template.', {
-      render: function () {
+      rendered: function () {
         t.ok(document.getElementById('test1') !== undefined, 'Successfully rendered template.')
         t.ok(document.querySelector('svg > g > path') !== null, 'Successfully rendered template with SVG.')
         t.end()
