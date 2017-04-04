@@ -141,7 +141,7 @@ gulp.task('generate', function () {
       .pipe(concat('debug.js'))
       .pipe(babel(babelConfig))
       .pipe(header(headerComment))
-      .pipe(footer(`\nObject.defineProperty(NGNX, 'version', NGN.const('${pkg.version}')); console.warn('Using NGNX v${pkg.version} in %cdebugging mode%c', 'font-weight: bold;', 'font-weight: normal')`))
+      .pipe(footer(`\nObject.defineProperty(NGNX, 'version', NGN.const('${pkg.version}')); console.warn('%cDebugging%c NGNX v${pkg.version}.', 'font-weight: bold;', 'font-weight: normal')`))
       .pipe(gulp.dest(DIR.dist))
       .on('end', cont)
   })
