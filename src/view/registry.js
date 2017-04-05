@@ -741,7 +741,15 @@ if (!NGN) {
         throw new Error(value + ' is not state managed by the View Registry.')
       }
 
+      let updated = false
+
       const updateState = () => {
+        if (updated) {
+          return
+        }
+
+        updated = true
+
         this._previousstate = this.state
         this._state = value.toString().trim()
 
@@ -787,7 +795,7 @@ if (!NGN) {
           }]), true)
 
           // Support synchronous execution when applicable
-          if (this._prestates['*'].length < 3) {
+          if (this._prestates['*'].length !== 3) {
             if (continueProcessing) {
               this.emit('state.preprocess', '*')
               next()
@@ -807,7 +815,7 @@ if (!NGN) {
           }]), true)
 
           // Support synchronous execution when applicable
-          if (this._prestates[value].length < 3) {
+          if (this._prestates[value].length !== 3) {
             if (continueProcessing) {
               this.emit('state.preprocess', value)
               next()
