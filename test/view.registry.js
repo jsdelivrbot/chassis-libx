@@ -120,8 +120,8 @@ test('Async Initialization', function (t) {
     namespace: 'regc.',
     selector: '.panel',
     states: {
-      offline: function (change) {},
-      online: function (change) {}
+      offline: function () {},
+      online: function () {}
     },
     init: function (next) {
       x = 1
@@ -131,7 +131,7 @@ test('Async Initialization', function (t) {
   })
 
   RegC.on('initialized', function () {
-    t.ok(x === 1, 'Initialization ran successfully.')
+    t.ok(x === 1, 'Asynchronous Initialization ran successfully.')
     t.end()
   })
 })
@@ -153,14 +153,14 @@ test('Sync Initialization', function (t) {
     initialState: 'offline'
   })
 
-  RegD.on('initialized', function () {
-    t.ok(x === 1, 'Initialization ran successfully.')
+  RegD.once('initialized', function () {
+    t.ok(x === 1, 'Synchronous Initialization ran successfully.')
     t.end()
   })
 })
 
 test('Extended References (Generated Names via Nesting)', function (t) {
-  var RegD = new NGNX.VIEW.Registry({
+  var RegE = new NGNX.VIEW.Registry({
     namespace: 'regd.',
     selector: '.panel',
     references: {
@@ -175,6 +175,64 @@ test('Extended References (Generated Names via Nesting)', function (t) {
     }
   })
 
-  t.ok(RegD.ref.hasOwnProperty('aDOG'), 'Properly generated name.')
+  t.ok(RegE.ref.hasOwnProperty('aDOG'), 'Properly generated name.')
   t.end()
+})
+
+test('Pre & Post-state-change Hooks', function (t) {
+  var x = 0
+  var y = 0
+
+  var RegF = new NGNX.VIEW.Registry({
+    namespace: 'regE.',
+    selector: '.panel',
+    states: {
+      offline: function () {
+        t.fail('Did not short circuit when false was returned from prestate.')
+      },
+      online: function () {
+        t.ok(x === 1, 'Executed pre-state hook before state change.')
+        t.ok(y === 2, 'Executed global pre-state hook before state change.')
+
+        x = 10
+      }
+    },
+
+    preStates: {
+      '*': function (currentState, proposedState, next) {
+        y++
+
+        setTimeout(function () {
+          next()
+        }, 300)
+      },
+
+      online: function (currentState, proposedState) {
+        t.ok(currentState === 'default', 'Proper current state passed to async handler.')
+        t.ok(proposedState === 'online', 'Proper proposed state passed to async handler.')
+
+        x++
+      },
+
+      offline: function () {
+        return false
+      }
+    },
+
+    postStates: {
+      '*': function () {
+        t.ok(x === 10, 'Global post-state-change triggered successfully.')
+
+        x++
+      },
+
+      online: function () {
+        t.ok(x === 11, 'Specific post-state-change triggered successfully.')
+        t.end()
+      }
+    }
+  })
+
+  RegF.state = 'offline'
+  RegF.state = 'online'
 })

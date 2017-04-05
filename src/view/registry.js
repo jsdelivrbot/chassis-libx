@@ -73,6 +73,12 @@ if (!NGN) {
    * event would be `property.title.changed`.
    * @fires state.changed
    * Triggered when the state of the registry has changed.
+   * @fires state.preprocess
+   * Triggered when a #preStates process is executed. The name of
+   * the preState is provided as the only parameter to event handlers.
+   * @fires state.postprocess
+   * Triggered when a #postStates process is executed. The name of
+   * the postState is provided as the only parameter to event handlers.
    * @fires parent.state.changed
    * Triggered when the state of the parent registry has changed.
    * @fires element.removed
@@ -255,6 +261,104 @@ if (!NGN) {
         _states: NGN.private(NGN.coalesce(cfg.states, {})),
 
         _state: NGN.private('default'),
+
+        /**
+         * @cfg {object} preStates
+         * This option provides pre-hook style operations that run before a
+         * state change occurs. For example:
+         *
+         * ```js
+         * let myRegistry = new NGNX.VIEW.Registry({
+         *   selector: '#portal',
+         *   properties: {
+         *     authorized: {
+         *       type: Boolean,
+         *       default: false
+         *     }
+         *   },
+         *   states: {
+         *     login: function () {...},
+         *     privatehomescreen: function () {...},
+         *     anotherprivatescreen: function () {...}
+         *   },
+         *
+         *   prestates: {
+         *     '*': function (currentState, proposedState) {
+         *       console.log(`Switching from ${currentState} to ${proposedState}!`)
+         *     },
+         *
+         *     privatehomescreen: function () {
+         *       if (!this.properties.authorized) {
+         *         return false
+         *       }
+         *     },
+         *
+         *     anotherprivatescreen: function (currentState, proposedState, next) {
+         *       myAsyncOperation(function (err, response) {
+         *         console.log(response)
+         *         next()
+         *       })
+         *     }
+         *   }
+         * })
+         * ```
+         *
+         * In the example above, the `'*'` "prestate" is a catch-all that operates
+         * **before** _every state change_ and **before** _every other prestate_.
+         * For every state change, it will log a message
+         * to the console stating "Switching from ____ to ____!"
+         *
+         * The `privatehomescreen` prestate synchronously checks the registry
+         * properties to see if the user is authorized to do so. If not, it returns
+         * `false`, which will prevent the state change from happening.
+         *
+         * The `anotherprivatescreen` prestate runs an asynchronous function, such
+         * as an HTTP/AJAX request before proceeding to change the state.
+         */
+        _prestates: NGN.private(NGN.coalesce(cfg.prestates, cfg.preStates, null)),
+
+        /**
+         * @cfg {object} postStates
+         * This option provides post-hook style operations that run after a
+         * state change occurs. For example:
+         *
+         * ```js
+         * let myRegistry = new NGNX.VIEW.Registry({
+         *   selector: '#portal',
+         *   properties: {
+         *     authorized: {
+         *       type: Boolean,
+         *       default: false
+         *     }
+         *   },
+         *   states: {
+         *     login: function () {...},
+         *     privatehomescreen: function () {...},
+         *     anotherprivatescreen: function () {...}
+         *   },
+         *
+         *   postStates: {
+         *     '*': function () {
+         *       console.log(`Switced from ${this.previousState} to ${this.state}!`)
+         *     },
+         *
+         *     login: function () {
+         *       console.log('User needs to login again.')
+         *     }
+         *   }
+         * })
+         * ```
+         *
+         * In the example above, the `'*'` "poststate" is a catch-all that operates
+         * **after** _every state change_, but **before** _every other poststate_.
+         * Every time a state change occurs, it will
+         * log "Switched from ____ to ____!". Notice no parameters are passed to
+         * the functions, because all state changes are known after they complete.
+         *
+         * In this example, changing to the `login` state would log a message
+         * indicating the user needs to login again.
+         */
+        _poststates: NGN.private(NGN.coalesce(cfg.poststates, cfg.postStates, null)),
 
         displaystate: NGN.private(null),
 
@@ -631,24 +735,93 @@ if (!NGN) {
         return
       }
 
+      // If the state isn't recognized, throw an error.
       if (!this.managesState(value)) {
         console.warn(`Could not change from%c ${this.state}%c to %c${value}%c state.%c ${value}%c is not a valid state. Valid states include:%c ${Object.keys(this._states).join(', ')}`, NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css)
         throw new Error(value + ' is not state managed by the View Registry.')
       }
 
-      this._previousstate = this.state
-      this._state = value.toString().trim()
+      const updateState = () => {
+        this._previousstate = this.state
+        this._state = value.toString().trim()
 
-      let change = {
-        old: this._previousstate,
-        new: this._state
+        let change = {
+          old: this._previousstate,
+          new: this._state
+        }
+
+        // Apply state changes
+        this._states[this._state](change)
+        this.emit('state.changed', change)
+
+        change = null
+
+        // Support global post-state-change hook
+        if (this.managesPostState('*')) {
+          this._poststates['*']()
+          this.emit('state.postprocess', '*')
+        }
+
+        // Support specific post-state-change hook
+        if (this.managesPostState(value)) {
+          this._poststates[value]()
+          this.emit('state.postprocess', value)
+        }
       }
 
-      // Apply state changes
-      this._states[this._state](change)
-      this.emit('state.changed', change)
+      // If there are no pre-state handlers, just update the state
+      // without setting up a taskrunner.
+      if (!this.managesPreState('*') && !this.managesPreState(value)) {
+        updateState()
+      }
 
-      change = null
+      // Change state as a series of tasks
+      let tasks = new NGNX.TaskRunner()
+
+      // Run the global pre-state-change hook first, if it is present.
+      if (this.managesPreState('*')) {
+        tasks.add('Execute global prestate (*).', (next) => {
+          let continueProcessing = NGN.coalesce(this._prestates['*'].apply(this, [this.state, value, () => {
+            this.emit('state.preprocess', '*')
+            next()
+          }]), true)
+
+          // Support synchronous execution when applicable
+          if (this._prestates['*'].length < 3) {
+            if (continueProcessing) {
+              this.emit('state.preprocess', '*')
+              next()
+            } else {
+              tasks.abort()
+            }
+          }
+        })
+      }
+
+      // Run the state change if it is present.
+      if (this.managesPreState(value)) {
+        tasks.add(`Execute specific ${value} prestate.`, (next) => {
+          let continueProcessing = NGN.coalesce(this._prestates[value].apply(this, [this.state, value, () => {
+            this.emit('state.preprocess', value)
+            next()
+          }]), true)
+
+          // Support synchronous execution when applicable
+          if (this._prestates[value].length < 3) {
+            if (continueProcessing) {
+              this.emit('state.preprocess', value)
+              next()
+            } else {
+              tasks.abort()
+            }
+          }
+        })
+      }
+
+      // Run the update if the process isn't aborted by this point.
+      tasks.add(`Set to ${value} state.`, updateState)
+
+      tasks.run(true) // Run tasks sequentially to assure order
     }
 
     /**
@@ -658,6 +831,30 @@ if (!NGN) {
      */
     get states () {
       return Object.keys(this._states)
+    }
+
+    /**
+     * @property {Array} preStates
+     * A list of pre-state-change hooks managed by the view registry.
+     * @readonly
+     */
+    get preStates () {
+      if (!this._prestates) {
+        return []
+      }
+      return Object.keys(this._prestates)
+    }
+
+    /**
+     * @property {Array} postStates
+     * A list of post-state-change hooks managed by the view registry.
+     * @readonly
+     */
+    get postStates () {
+      if (!this._poststates) {
+        return []
+      }
+      return Object.keys(this._poststates)
     }
 
     /**
@@ -795,6 +992,54 @@ if (!NGN) {
      */
     managesState (state) {
       return this._states.hasOwnProperty(state) && NGN.isFn(this._states[state])
+    }
+
+    /**
+     * @method managesPreState
+     * Indicates the view registry manages a specific pre-state-change hook.
+     * @param {string} state
+     * The name of the state to check for.
+     * returns {boolean}
+     * @private
+     */
+    managesPreState (state) {
+      if (!this._prestates) {
+        return false
+      }
+
+      return this._prestates.hasOwnProperty(state) && NGN.isFn(this._prestates[state])
+    }
+
+    /**
+     * @method managesPostState
+     * Indicates the view registry manages a specific post-state-change hook.
+     * @param {string} state
+     * The name of the state to check for.
+     * returns {boolean}
+     * @private
+     */
+    managesPostState (state) {
+      if (!this._poststates) {
+        return false
+      }
+
+      return this._poststates.hasOwnProperty(state) && NGN.isFn(this._poststates[state])
+    }
+
+    /**
+     * @method clearPreStates
+     * Remove all pre-state-change hooks.
+     */
+    clearPreStates () {
+      this._prestates = null
+    }
+
+    /**
+     * @method clearPostStates
+     * Remove all post-state-change hooks.
+     */
+    clearPostStates () {
+      this._poststates = null
     }
 
     /**
