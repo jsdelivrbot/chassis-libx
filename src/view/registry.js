@@ -89,7 +89,7 @@ if (!NGN) {
    * @fires monitoring.disabled
    * Triggered when DOM element monitoring becomes inactive.
    */
-  class ViewRegistry extends NGNX.Driver {
+  class NgnViewRegistry extends NGNX.Driver {
     constructor (cfg) {
       cfg = cfg || {}
 
@@ -737,7 +737,12 @@ if (!NGN) {
 
       // If the state isn't recognized, throw an error.
       if (!this.managesState(value)) {
-        console.warn(`Could not change from%c ${this.state}%c to %c${value}%c state.%c ${value}%c is not a valid state. Valid states include:%c ${Object.keys(this._states).join(', ')}`, NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css)
+        console.warn(`Could not change from%c ${this.state}%c to %c${value}%c state.%c ${value}%c is not a valid state.`, NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;', NGN.css, 'font-weight: normal;')
+
+        console.groupCollapsed('Valid States')
+        Object.keys(this._states).forEach((state) => console.log(state))
+        console.groupEnd()
+
         throw new Error(value + ' is not state managed by the View Registry.')
       }
 
@@ -1322,7 +1327,7 @@ if (!NGN) {
   }
 
   NGNX.VIEW = NGNX.VIEW || {}
-  NGNX.VIEW.Registry = ViewRegistry
+  NGNX.VIEW.Registry = NgnViewRegistry
   NGNX.ViewRegistry = NGN.deprecateClass(NGNX.VIEW.Registry, 'NGNX.ViewRegistry is now NGNX.VIEW.Registry')
   // Object.defineProperty(NGNX, 'View Registry', NGN.const(View Registry))
 }
