@@ -26,8 +26,10 @@ if (!NGNX) {
         throw new Error('The specified element is a not a valid DOM element.')
       }
 
+      let parent // eslint-disable-line no-unused-vars
+
       if (cfg.hasOwnProperty('parent')) {
-        let parent = cfg.parent.self // eslint-disable-line no-unused-vars
+        parent = cfg.parent.self // eslint-disable-line no-unused-vars
       }
 
       cfg.selector = NGN.DOM.getElementSelector(cfg.element, NGN.coalesce(parent, document.body)) // eslint-disable-line no-undef
