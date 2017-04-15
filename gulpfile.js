@@ -2,7 +2,7 @@
 
 const common = [
   'utility.js',
-  // 'reference/HTMLReferenceElement.js',
+  'reference/HTMLReferenceElement.js',
   // 'reference/Manager.js',
   'data/httpproxy.js',
   'driver.js',
