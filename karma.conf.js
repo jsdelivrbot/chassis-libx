@@ -163,9 +163,9 @@ var getFiles = function () {
     ]
   } else {
     files = [
+      'src/utility.js',
       'src/reference/HTMLReferenceElement.js',
       'src/reference/Manager.js',
-      'src/utility.js',
       'src/data/httpproxy.js',
       'src/driver.js',
       'src/loader.js',

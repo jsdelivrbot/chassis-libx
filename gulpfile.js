@@ -2,14 +2,14 @@
 
 const common = [
   'utility.js',
-  'reference/HTMLReferenceElement.js',
-  'reference/Manager.js',
-  'data/httpproxy.js',
-  'driver.js',
-  'loader.js',
-  'state.js',
-  'view/registry.js',
-  'view/component.js'
+  // 'reference/HTMLReferenceElement.js',
+  // 'reference/Manager.js',
+  // 'data/httpproxy.js',
+  // 'driver.js',
+  // 'loader.js',
+  // 'state.js',
+  // 'view/registry.js',
+  // 'view/component.js'
 ]
 
 require('localenvironment')
