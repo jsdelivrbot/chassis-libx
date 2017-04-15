@@ -1328,6 +1328,6 @@ if (!NGN) {
 
   NGNX.VIEW = NGNX.VIEW || {}
   NGNX.VIEW.Registry = NgnViewRegistry
-  NGNX.ViewRegistry = NGN.deprecateClass(NGNX.VIEW.Registry, 'NGNX.ViewRegistry is now NGNX.VIEW.Registry')
+  // NGNX.ViewRegistry = NGN.deprecateClass(NGNX.VIEW.Registry, 'NGNX.ViewRegistry is now NGNX.VIEW.Registry')
   // Object.defineProperty(NGNX, 'View Registry', NGN.const(View Registry))
 }
