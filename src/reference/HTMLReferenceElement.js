@@ -1,7 +1,7 @@
 'use strict'
 
 // Throw an error if the DOM library isn't included.
-NGN.needs(NGN, 'DOM')
+// NGN.needs(NGN, 'DOM')
 
 /**
  * @class HTMLReferenceElement
