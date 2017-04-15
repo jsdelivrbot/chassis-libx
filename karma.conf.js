@@ -179,7 +179,7 @@ var getFiles = function () {
 
   // let allfiles = ['https://rawgit.com/ngnjs/cdn/master/chassis-lib/chassis.legacy.min.js']
   let cb = (new Date()).getTime().toString()
-  console.log('Cache buster:', cb)
+  console.log('Cache Buster:', cb)
   let allfiles = ['https://cdn.author.io/ngn/1.2.18/legacy.complete.min.js?cachebust=cb_' + cb]
   // let allfiles = ['https://cdn.author.io/ngn/1.0.199/chassis.min.js']
   allfiles = allfiles.concat(files)
