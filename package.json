@@ -9,7 +9,8 @@
     "fulltest": "BUILD_MODE=prod karma start karma.conf.js && standard --verbose | snazzy",
     "firefox": "karma start karma.conf.js --firefox && standard --verbose | snazzy",
     "safari": "karma start karma.conf.js --safari && standard --verbose | snazzy",
-    "edge": "karma start karma.conf.js --edge && standard --verbose | snazzy"
+    "edge": "karma start karma.conf.js --edge && standard --verbose | snazzy",
+    "ie": "karma start karma.conf.js --ie && standard --verbose | snazzy"
   },
   "repository": {
     "type": "git",
