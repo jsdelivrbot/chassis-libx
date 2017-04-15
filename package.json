@@ -1,6 +1,6 @@
 {
   "name": "ngnx-chassis",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "description": "The opininated 'extra' library for NGN.",
   "main": "index.js",
   "scripts": {
@@ -65,6 +65,7 @@
     "gulp-header": "^1.8.8",
     "gulp-sourcemaps": "^2.5.0",
     "gulp-uglify": "^2.1.2",
+    "gulp-util": "^3.0.8",
     "karma": "^1.5.0",
     "karma-browserify": "^5.1.1",
     "karma-chrome-launcher": "^2.0.0",
@@ -110,7 +111,9 @@
       "localStorage",
       "Element",
       "HTMLElement",
-      "MutationObserver"
+      "MutationObserver",
+      "MissingDependencyError",
+      "HTMLReferenceElement"
     ]
   }
 }

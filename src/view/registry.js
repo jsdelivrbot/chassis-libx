@@ -552,7 +552,7 @@ if (!NGN) {
       }
 
       // Create a self reference by Driver ID (inherited)
-      NGN.ref.create(this.id, this.selector)
+      NGNX.REF.create(this.id, this.selector)
 
       // Initialize the properties store
       if (this.propertyFields !== null) {
@@ -672,12 +672,12 @@ if (!NGN) {
     }
 
     /**
-     * @property {NGN.ref} element
+     * @property {NGNX.REF} element
      * The NGN reference to the DOM #selector DOM element.
      * @readonly
      */
     get self () {
-      return NGN.ref[this.id]
+      return NGNX.REF[this.id]
     }
 
     /**
@@ -789,7 +789,7 @@ if (!NGN) {
       }
 
       // Change state as a series of tasks
-      let tasks = new NGNX.TaskRunner()
+      let tasks = new NGN.Tasks()
 
       // Run the global pre-state-change hook first, if it is present.
       if (this.managesPreState('*')) {

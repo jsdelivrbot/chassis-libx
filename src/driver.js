@@ -42,14 +42,14 @@ if (!NGN) {
          * @cfg {Object} [references]
          * An object of key/values depicting a reference. Each key is the
          * reference name, while each value is a DOM selector pattern. Providing
-         * references here is the same as writing `NGN.ref.create('key',
+         * references here is the same as writing `NGNX.REF.create('key',
          * 'selector/value')` for each reference (this is a shortcut method).
          * Additionally, these references are associated with the driver for
          * easy access.
          *
          * A reference can be accessed in one of two ways:
          *
-         * 1. NGN.ref.key
+         * 1. NGNX.REF.key
          * 1. Driver.ref.key or Driver.dom.key
          *
          * ```js
@@ -61,7 +61,7 @@ if (!NGN) {
          *   }
          * })
          *
-         * NGN.ref.buttons.forward('click', NGN.BUS.attach('some.event'))
+         * NGNX.REF.buttons.forward('click', NGN.BUS.attach('some.event'))
          * // same as
          * Driver.ref.buttons.forward('click', NGN.BUS.attach('some.event'))
          * // same as
@@ -73,7 +73,7 @@ if (!NGN) {
          * ```
          *
          * References are _tecnically_ global, so they are accessible via
-         * `NGN.ref`. However; practical use has proven there is little reason
+         * `NGNX.REF`. However; practical use has proven there is little reason
          * to access a Driver reference globally. The NGNX.Driver adds a scope
          * (#id) to the reference name to prevent conflicts with other Drivers.
          * This is handled by the driver, providing a simpler syntax. As a
@@ -304,11 +304,11 @@ if (!NGN) {
       let originalName = name
       name = this.id + '-' + name
 
-      if (NGN.ref[name] === undefined || NGN.ref[name] === null) {
-        NGN.ref.create(name, selector)
+      if (NGNX.REF[name] === undefined || NGNX.REF[name] === null) {
+        NGNX.REF.create(name, selector)
 
         Object.defineProperty(this.ref, originalName, NGN.get(function () {
-          return NGN.ref[name]
+          return NGNX.REF[name]
         }))
       }
     }

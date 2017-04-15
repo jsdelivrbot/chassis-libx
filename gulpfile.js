@@ -1,7 +1,24 @@
 'use strict'
 
+const common = [
+  'reference/HTMLReferenceElement.js',
+  'reference/Manager.js',
+  'utility.js',
+  'data/httpproxy.js',
+  'driver.js',
+  'loader.js',
+  'state.js',
+  'task.js',
+  'taskrunner.js',
+  'view/registry.js',
+  'view/component.js'
+]
+
 require('localenvironment')
+require('colors')
+
 const gulp = require('gulp')
+const gutil = require('gulp-util')
 const concat = require('gulp-concat')
 const uglify = require('gulp-uglify')
 const babel = require('gulp-babel')
@@ -19,53 +36,15 @@ const GithubPublisher = require('publish-release')
 const fs = require('fs')
 const path = require('path')
 const pkg = require('./package.json')
-let headerComment = '/**\n  * v' + pkg.version + ' generated on: '
-  + (new Date()) + '\n  * Copyright (c) 2014-' + (new Date()).getFullYear()
-  + ', Ecor Ventures LLC. All Rights Reserved. See LICENSE (BSD).\n  */\n'
 
-var DIR = {
+const headerComment = `/**\n  * v${pkg.version} generated on: ${(new Date())}\n`
+  + `\n  * Copyright (c) 2014-${(new Date()).getFullYear()}, `
+  + 'Ecor Ventures LLC. All Rights Reserved. See LICENSE (BSD).\n  */\n'
+
+const DIR = {
   source: path.resolve('./src'),
   dist: path.resolve('./dist')
 }
-
-// Build a release
-gulp.task('build', ['clean', 'generate'])
-
-// Check versions for Bower & npm
-// gulp.task('version', function (next) {
-//   console.log('Checking versions.')
-//
-//   // Sync Bower
-//   var bower = require('./bower.json')
-//   if (bower.version !== pkg.version) {
-//     console.log('Updating bower package.')
-//     bower.version = pkg.version
-//     fs.writeFileSync(path.resolve('./bower.json'), JSON.stringify(bower, null, 2))
-//   }
-// })
-
-// Create a clean build
-gulp.task('clean', function (next) {
-  console.log('Cleaning distribution.')
-  try {
-    fs.accessSync(DIR.dist, fs.F_OK)
-    del.sync(DIR.dist)
-  } catch (e) {}
-  fs.mkdirSync(DIR.dist)
-  next()
-})
-
-const common = [
-  'utility.js',
-  'data/httpproxy.js',
-  'driver.js',
-  'loader.js',
-  'state.js',
-  'task.js',
-  'taskrunner.js',
-  'view/registry.js',
-  'view/component.js'
-]
 
 const minifyConfig = {
   presets: ['es2015', 'es2017'],
@@ -87,6 +66,23 @@ const babelConfig = {
   presets: ['es2015', 'es2017']
 }
 
+// Build a release
+gulp.task('build', ['clean', 'generate'])
+
+// Check versions for Bower & npm
+// gulp.task('version', function (next) {
+//   console.log('Checking versions.')
+//
+//   // Sync Bower
+//   var bower = require('./bower.json')
+//   if (bower.version !== pkg.version) {
+//     console.log('Updating bower package.')
+//     bower.version = pkg.version
+//     fs.writeFileSync(path.resolve('./bower.json'), JSON.stringify(bower, null, 2))
+//   }
+// })
+
+
 const expand = function (array) {
   return array.map(function (file) {
     return path.join(DIR.source, file)
@@ -107,15 +103,27 @@ const walk = function (dir) {
   return files
 }
 
-require('colors')
+// Create a clean build
+gulp.task('clean', function (next) {
+  gutil.log('Cleaning distribution.')
+
+  try {
+    fs.accessSync(DIR.dist, fs.F_OK)
+    del.sync(DIR.dist)
+  } catch (e) {}
+
+  fs.mkdir(DIR.dist, next)
+})
+
 gulp.task('generate', function () {
-  console.log('Generating distribution files in ', DIR.dist)
+  gutil.log('Generating distribution files in ', DIR.dist)
+
   const tasks = new ShortBus()
   const mapRoot = 'https://cdn.author.io/ngnx/' + pkg.version
   const srcmapcfg = {
     includeContent: true,
     sourceMappingURL: function (file) {
-      return mapRoot + '/' + file.relative + '.map'
+      return `${mapRoot}/${file.relative}.map`
     },
     sourceURL: function (file) {
       return file.relative.replace('.min.js', '.js')
@@ -123,7 +131,7 @@ gulp.task('generate', function () {
   }
 
   common.forEach(function (filename) {
-    tasks.add('Generating common file:' + filename, function (cont) {
+    tasks.add(`Generating common file: ${filename}`, function (cont) {
       gulp.src(path.join(DIR.source, filename))
         .pipe(concat(filename.replace('.js', '.min.js').replace(path.sep, '.')))
         .pipe(babel(babelConfig))
@@ -159,45 +167,49 @@ gulp.task('generate', function () {
       .on('end', cont)
   })
 
-  tasks.on('stepstarted', (step) => {
-    console.log(step.number + ')', step.name)
-  })
+  tasks.on('stepstarted', (step) => gutil.log(`${step.number}) ${step.name}`))
 
   tasks.process(true)
 })
 
 gulp.task('prereleasecheck', function (next) {
-  console.log('Checking if package already exists.')
-  const child = cp.spawn('npm', ['info', pkg.name])
+  gutil.log('Checking if package already exists.')
 
+  const child = cp.spawn('npm', ['info', pkg.name])
   let data = ""
+
   child.stdout.on('data', function (chunk) {
     data += chunk.toString()
   })
+
   child.on('close', function () {
     const re = new RegExp('latest: \'' + pkg.version + '\'')
+
     if (re.exec(data) === null) {
       next()
     } else {
-      console.log('The version has not changed (' + pkg.version + '). A new release is unnecessary. Aborting deployment with success code.')
+      gutil.log(`The version has not changed (${pkg.version}). A new release is unnecessary. Aborting deployment with success code.`)
       process.exit(0)
     }
   })
 })
 
 gulp.task('release', function (next) {
-  console.log('Checking if package already exists.')
-  const child = cp.spawn('npm', ['info', pkg.name])
+  gutil.log('Checking if package already exists.')
 
+  const child = cp.spawn('npm', ['info', pkg.name])
   let data = ""
+
   child.stdout.on('data', function (chunk) {
     data += chunk.toString()
   })
+
   child.on('close', function () {
-    const re = new RegExp('latest: \'' + pkg.version + '\'')
+    const re = new RegExp(`latest: '${pkg.version}'`)
+
     if (re.exec(data) === null) {
       if (!mh.hasAll(process.env, 'GITHUB_TOKEN', 'GITHUB_ACCOUNT', 'GITHUB_REPO')) {
-        throw new Error('Release not possible. Missing data: ' + mh.missing.join(', '))
+        throw new Error(`Release not possible. Missing data: ${mh.missing.join(', ')}`)
       }
 
       // Check if the release already exists.
@@ -205,12 +217,13 @@ gulp.task('release', function (next) {
 
       https.get({
         hostname: 'api.github.com',
-        path: '/repos/' + process.env.GITHUB_ACCOUNT + '/' + process.env.GITHUB_REPO + '/releases',
+        path: `/repos/${process.env.GITHUB_ACCOUNT}/${process.env.GITHUB_REPO}/releases`,
         headers: {
           'user-agent': 'Release Checker'
         }
       }, function (res) {
         let data = ""
+
         res.on('data', function (chunk) {
           data += chunk
         })
@@ -225,7 +238,8 @@ gulp.task('release', function (next) {
           })
 
           if (data.length > 0) {
-            console.log('Release ' + pkg.version + ' already exists. Aboting without error.')
+            gutil.log(`Release ${pkg.version} already exists. Aboting without error.`)
+
             process.exit(0)
           }
 
@@ -237,7 +251,7 @@ gulp.task('release', function (next) {
             repo: process.env.GITHUB_REPO,
             tag: pkg.version,
             name: pkg.version,
-            notes: 'Releasing v' + pkg.version,
+            notes: `Releasing v${pkg.version}`,
             draft: false,
             prerelease: false,
             reuseRelease: true,
@@ -247,12 +261,12 @@ gulp.task('release', function (next) {
             target_commitish: 'master'
           }, function (err, release) {
             if (err) {
-              err.errors.forEach(function (e) {
-                console.error((e.resource + ' ' + e.code).red.bold)
-              })
+              err.errors.forEach((e) => console.error((`${e.resource} ${e.code}`).red.bold))
+
               process.exit(1)
             }
-            console.log(release)
+
+            gutil.log(release)
           })
         })
       })

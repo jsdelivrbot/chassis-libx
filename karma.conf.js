@@ -24,6 +24,7 @@ switch (mode) {
   case 'live':
     console.warn('Running a live developer test.')
     useDistributionFiles = false
+
   case 'prod': // eslint-disable-line no-fallthrough
     useDistributionFiles = typeof useDistributionFiles === 'boolean' ? useDistributionFiles : true
 
@@ -164,6 +165,8 @@ var getFiles = function () {
     ]
   } else {
     files = [
+      'src/reference/HTMLReferenceElement.js',
+      'src/reference/Manager.js',
       'src/utility.js',
       'src/data/httpproxy.js',
       'src/driver.js',
