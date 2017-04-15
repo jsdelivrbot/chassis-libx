@@ -1,15 +1,13 @@
 'use strict'
 
 const common = [
+  'utility.js',
   'reference/HTMLReferenceElement.js',
   'reference/Manager.js',
-  'utility.js',
   'data/httpproxy.js',
   'driver.js',
   'loader.js',
   'state.js',
-  'task.js',
-  'taskrunner.js',
   'view/registry.js',
   'view/component.js'
 ]
