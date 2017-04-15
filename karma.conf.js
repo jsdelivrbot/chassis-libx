@@ -54,14 +54,12 @@ switch (mode) {
         willtest = true
       }
 
-      // console.info('  - ' + browser + ':', version + (willtest ? ' ---> WILL BE TESTED' : ''))
-
       if (browsers.indexOf(browser) >= 0) {
         // version = version - 1
         customLaunchers['cl_' + browser + '_' + version.toString()] = {
           base: 'SauceLabs',
           browserName: browser,
-          version: browser === 'chrome' ? 55 : (browser === 'firefox' ? 50 : version)
+          version: version
         }
       }
     })
@@ -109,12 +107,12 @@ switch (mode) {
         version: '45'
       }
 
-      customLaunchers.cl_firefox_50 = {
-        base: 'SauceLabs',
-        browserName: 'firefox',
-        platform: 'Windows 7',
-        version: '50'
-      }
+      // customLaunchers.cl_firefox_50 = {
+      //   base: 'SauceLabs',
+      //   browserName: 'firefox',
+      //   platform: 'Windows 7',
+      //   version: '50'
+      // }
     }
 
     console.log('Testing Browsers:')
