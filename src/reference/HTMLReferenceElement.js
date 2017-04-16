@@ -346,6 +346,8 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
       ? this.getCollapsedDomStructure()
       : this.elements
 
+    elements = NGN.typeof(elements) === 'array' ? elements : [elements]
+
     if (typeof scope === 'object') {
       for (let eventName in scope) {
         elements.forEach((element) => element.addEventListener(eventName, scope[eventName]))
@@ -509,6 +511,8 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
     let elements = this.eventCompression
       ? this.getCollapsedDomStructure()
       : this.elements
+
+    elements = NGN.typeof(elements) === 'array' ? elements : [elements]
 
     if (typeof sourceEvent === 'object') {
       for (let eventName in sourceEvent) {
