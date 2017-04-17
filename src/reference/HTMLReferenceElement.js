@@ -26,7 +26,91 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
       deepcollapse: NGN.private(false),
       smartevents: NGN.private(true),
 
-      filters: NGN.private(null)
+      filters: NGN.private(null),
+
+      getValue: NGN.private((attribute) => {
+        if (this.length === 1) {
+          return this.element[attribute]
+        }
+
+        return this.elements.map((element) => element[attribute])
+      }),
+
+      setValue: NGN.private((attribute, value) => {
+        switch (this.length) {
+          case 0:
+            return
+
+          case 1:
+            this.element[attribute] = value
+            return
+
+          default:
+            if (NGN.isArray(value)) {
+              this.each((element) => {
+                if (value.length > 0) {
+                  element[attribute] = value.shift()
+                }
+              })
+            }
+        }
+      })
+    })
+
+    // Apply common getter/setter proxies
+    // These are experimental
+    let attributes = [
+      'value',
+      'innerHTML',
+      'outerHTML',
+      'style',
+      'tabIndex',
+      'title',
+      'className',
+      'attributes',
+      'childElementCount',
+      'children',
+      // 'className',
+      'clientHeight',
+      'clientLeft',
+      'clientTop',
+      'clientWidth',
+      'firstElementChild',
+      'id',
+      // 'innerHTML',
+      'lastElementChild',
+      'localName',
+      'name',
+      'namespaceURI',
+      'nextElementSibling',
+      'ongotpointercapture',
+      'onlostpointercapture',
+      'onwheel',
+      // 'outerHTML',
+      'prefix',
+      'previousElementSibling',
+      'scrollHeight',
+      'scrollLeft',
+      'scrollTop',
+      'scrollWidth',
+      'shadowRoot',
+      'slot',
+      'tabStop',
+      'tagName'
+    ]
+
+    attributes.forEach((attribute) => {
+      Object.defineProperty(this, attribute, {
+        enumerable: false,
+        get: () => {
+          NGN.BUS && NGN.BUS.emit('NGN.ADVISORY.EXPERIMENTAL', `{attribute} is an experimental attribute of NGNX.REF.`)
+          return this.getValue(attribute)
+        },
+        set: (value) => {
+          NGN.BUS && NGN.BUS.emit('NGN.ADVISORY.EXPERIMENTAL', `Setting {attribute} is an experimental feature of NGNX.REF.`)
+          this.setValue(attribute, value)
+        }
+      })
     })
 
     selection = null
@@ -171,11 +255,7 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
 
     methods.forEach((method) => {
       proxy[method] = function () {
-        let args = NGN.slice(arguments)
-
-        me.each((element) => {
-          element.classList[method].apply(element, args)
-        })
+        me.each((element) => element.classList[method](...arguments))
       }
     })
 
