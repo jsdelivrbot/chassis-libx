@@ -437,6 +437,10 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
     }
   }
 
+  pool () {
+    return NGN.deprecate(this.on, 'NGNX.REF.pool has been merged into NGNX.REF.on().')
+  }
+
   /**
    * @method once
    * The same as #on, but the event handler is removed after the event is fired.
