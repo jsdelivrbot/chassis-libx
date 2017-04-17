@@ -303,7 +303,9 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
    * Iterate through the referenced elements and apply a function to each.
    * @param  {Function} appliedFn
    * The function to apply to each element. This function receives a single
-   * [Node](https://developer.mozilla.org/en-US/docs/Web/API/Node) argument.
+   * [Node](https://developer.mozilla.org/en-US/docs/Web/API/Node), the index
+   * of the node within the reference collection, and the entire collection
+   * as arguments (similar to Array.forEach).
    */
   each (fn) {
     if (this.empty) {
@@ -312,7 +314,11 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
 
     let elements = this.length === 1 ? [this.element] : this.elements
 
-    elements.forEach((element) => fn(element))
+    elements.forEach((element, index, elementList) => fn(element, index, elementList))
+  }
+
+  forEach () {
+    this.each(...arguments)
   }
 
   /**
