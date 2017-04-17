@@ -179,9 +179,9 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
     }
 
     // Filter the elements and return the results.
-    return NGN.slice(this.element).filter((element) => {
+    return NGN.slice(this.element).filter((element, elementIndex, elementList) => {
       for (let filterIndex in this.filters) {
-        let keep = this.filters[filterIndex](element)
+        let keep = this.filters[filterIndex](element, elementIndex, elementList)
 
         if (!keep) {
           return false
@@ -288,13 +288,13 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
 
   // Alias find for convenience, but warn that it's not really supported
   querySelector () {
-    console.warn('querySelector is not a valid HTMLReferenceElement method. Using find instead.')
+    console.warn('querySelector is not a valid HTMLReferenceElement method. Using find() instead.')
     this.find(...arguments)
   }
 
   // Alias find for convenience, but warn that it's not really supported
   querySelectorAll () {
-    console.warn('querySelectorAll is not a valid HTMLReferenceElement method. Using find instead.')
+    console.warn('querySelectorAll is not a valid HTMLReferenceElement method. Using find() instead.')
     this.find(...arguments)
   }
 
@@ -322,6 +322,19 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
    */
   setEachAttribute (key, value) {
     this.each((element) => element.setAttribute(key, value))
+  }
+
+  /**
+   * @method removeEachAttribute
+   * This method iterates through each of the elements of the reference,
+   * applying the
+   * [removeAttribute](https://developer.mozilla.org/en-US/docs/Web/API/Element/removeAttribute)
+   * method to each.
+   * @param {String} name
+   * The name of the attribute to set.
+   */
+  removeEachAttribute (key) {
+    this.each((element) => element.removeAttribute(key))
   }
 
   /**
