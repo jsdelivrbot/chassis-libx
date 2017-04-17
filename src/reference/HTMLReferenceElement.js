@@ -306,7 +306,13 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
    * [Node](https://developer.mozilla.org/en-US/docs/Web/API/Node) argument.
    */
   each (fn) {
-    this.elements.forEach((element) => fn(element))
+    if (this.empty) {
+      return
+    }
+
+    let elements = this.length === 1 ? [this.element] : this.elements
+
+    elements.forEach((element) => fn(element))
   }
 
   /**

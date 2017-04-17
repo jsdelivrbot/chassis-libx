@@ -610,6 +610,11 @@ if (!NGN) {
      */
     on () {
       if (arguments.length > 0) {
+        if (typeof arguments[0] === 'object') {
+          this.pool(...arguments)
+          return
+        }
+
         if (arguments[0] === 'template.render') {
           console.warn('%cDEPRECATION NOTICE:%c "template.render" event is now "template.rendered"', NGN.css, '')
         }
@@ -628,6 +633,10 @@ if (!NGN) {
      */
     once () {
       if (arguments.length > 0) {
+        if (typeof arguments[0] === 'object') {
+          throw new Error('Nested/pooled events (object) are only supported for the on() method.')
+        }
+
         if (arguments[0] === 'template.render') {
           console.warn('%cDEPRECATION NOTICE:%c "template.render" event is now "template.rendered"', NGN.css, '')
         }
@@ -720,6 +729,7 @@ if (!NGN) {
      * @param {object} handlers
      * An object containing event listeners. See NGN.BUS.pool for syntax and
      * examples.
+     * @private
      */
     pool (extra, data) {
       if (typeof extra === 'object') {
