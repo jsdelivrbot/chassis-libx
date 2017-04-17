@@ -565,6 +565,11 @@ if (!NGN) {
             old: change.old,
             new: change.new
           })
+
+          this.emit(`property.changed.${change.property}`, {
+            old: change.old,
+            new: change.new
+          })
         })
 
         this._properties.on('field.update', (change) => {
