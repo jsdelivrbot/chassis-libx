@@ -193,7 +193,7 @@ test('NGNX.REF Property Reference', function (t) {
 })
 
 test('NGNX.REF.eachClassList', function (t) {
-  let html = '<div class="multitest"><span>A</span><span>B</span><span>C</span></div>'
+  var html = '<div class="multitest"><span>A</span><span>B</span><span>C</span></div>'
   document.body.insertAdjacentHTML('beforeend', html)
 
   NGNX.REF.create('mtest', '.multitest span')
