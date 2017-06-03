@@ -894,11 +894,11 @@ if (!NGN) {
      * Determines whether the registry element (#selector) is in the viewport or not.
      */
     get inViewport () {
-      return this.elementInViewport(this.self)
+      return this.elementInViewport(this.self.element)
     }
 
     /**
-     * @method isElementInViewport
+     * @method elementInViewport
      * Determines whether a DOM element is in the viewport or not.
      * @param {HTMLElement} element
      * The DOM element to check.
@@ -947,7 +947,7 @@ if (!NGN) {
       let inView = this.inViewport
 
       if (this._activeViewportState !== inView) {
-        this.emit(inView ? 'enterViewport' : 'exitViewport', this.self)
+        this.emit(inView ? 'enterViewport' : 'exitViewport', this.self.element)
       }
     }
 
@@ -1299,7 +1299,7 @@ if (!NGN) {
         throw new Error('NGN.DOM is required to invoke the destroy method.')
       }
 
-      NGN.DOM.destroy(this.self)
+      NGN.DOM.destroy(this.self.element)
     }
 
     /**
@@ -1311,11 +1311,11 @@ if (!NGN) {
      * method can redisplay the element correctly.
      */
     hide () {
-      if (this.self.style && this.self.style.display) {
-        this.displaystate = NGN.coalesce(this.self.style.display)
+      if (this.self.element.style && this.self.element.style.display) {
+        this.displaystate = NGN.coalesce(this.self.element.style.display)
       }
 
-      this.self.style.display = 'none'
+      this.self.element.style.display = 'none'
     }
 
     /**
@@ -1327,7 +1327,7 @@ if (!NGN) {
      * _before_ #hide is called, the display will be set to `''`.
      */
     show () {
-      this.self.style.display = NGN.coalesce(this.displaystate, '')
+      this.self.element.style.display = NGN.coalesce(this.displaystate, '')
     }
   }
 

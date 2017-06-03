@@ -20,6 +20,7 @@ const gutil = require('gulp-util')
 const concat = require('gulp-concat')
 const uglify = require('gulp-uglify')
 const babel = require('gulp-babel')
+const pump = require('pump')
 const cp = require('child_process')
 const header = require('gulp-header')
 const footer = require('gulp-footer')
@@ -35,9 +36,9 @@ const fs = require('fs')
 const path = require('path')
 const pkg = require('./package.json')
 
-const headerComment = `/**\n  * v${pkg.version} generated on: ${(new Date())}\n`
+let headerComment = `/**\n  * v${pkg.version} generated on: ${(new Date())}`.trim()
   + `\n  * Copyright (c) 2014-${(new Date()).getFullYear()}, `
-  + 'Ecor Ventures LLC. All Rights Reserved. See LICENSE (BSD).\n  */\n'
+  + 'Ecor Ventures LLC. All Rights Reserved.\n  * See LICENSE (BSD-3-Clause) at \n  * https://github.com/ngnjs/chassis-libx/blob/master/LICENSE.\n  */\n'
 
 const DIR = {
   source: path.resolve('./src'),
@@ -45,7 +46,7 @@ const DIR = {
 }
 
 const minifyConfig = {
-  presets: ['es2015', 'es2017'],
+  // presets: ['es2015'],
   mangle: true,
   compress: {
     dead_code: true,
@@ -130,6 +131,15 @@ gulp.task('generate', function () {
 
   common.forEach(function (filename) {
     tasks.add(`Generating common file: ${filename}`, function (cont) {
+      // pump([
+      //   gulp.src(path.join(DIR.source, filename)),
+      //   concat(filename.replace('.js', '.min.js').replace(path.sep, '.')),
+      //   babel(babelConfig),
+      //   uglify(minifyConfig),
+      //   header(headerComment),
+      //   sourcemaps.write('./sourcemaps', srcmapcfg),
+      //   gulp.dest(DIR.dist)
+      // ], cont)
       gulp.src(path.join(DIR.source, filename))
         .pipe(concat(filename.replace('.js', '.min.js').replace(path.sep, '.')))
         .pipe(babel(babelConfig))

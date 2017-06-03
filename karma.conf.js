@@ -179,7 +179,7 @@ var getFiles = function () {
 
   // let allfiles = ['https://rawgit.com/ngnjs/cdn/master/chassis-lib/chassis.legacy.min.js']
   let cb = (new Date()).getTime().toString()
-  console.log('Cache Buster:', cb)
+  // console.log('Cache Buster:', cb)
   let allfiles = ['https://cdn.author.io/ngn/latest/legacy.complete.min.js?cachebust=cb_' + cb]
   // let allfiles = ['https://cdn.author.io/ngn/1.0.199/chassis.min.js']
   allfiles = allfiles.concat(files)
@@ -187,10 +187,18 @@ var getFiles = function () {
   allfiles.push({
     pattern: 'test/*.html',
     served: true,
-    nocache: true
+    nocache: true,
+    watched: false
   })
 
-  console.log('Including Files:\n', allfiles)
+  console.log('Including Files:\n')
+  allfiles.forEach((filename) => {
+    if (filename.hasOwnProperty('pattern')) {
+      console.log(' - ' + filename.pattern)
+    } else {
+      console.log(' - ' + filename)
+    }
+  })
 
   return allfiles
 }
