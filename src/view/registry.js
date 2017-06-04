@@ -905,14 +905,24 @@ if (!NGN) {
      * @returns {boolean}
      * @private
      */
-    elementInViewport (element) {
+    elementInViewport (element, x = 100, y = 100) {
       let rect = element.getBoundingClientRect()
-      return (
-        rect.top >= 0 &&
-        rect.left >= 0 &&
-        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-      )
+      let tolerance = 0.01 // getBoundingClientRect provides the position up to 10 decimals
+      let parentRects = []
+
+      while (element.parentElement !== null) {
+        parentRects.push(element.parentElement.getBoundingClientRect())
+        element = element.parentElement
+      }
+
+      return parentRects.every((parentRect) => {
+        let visiblePixelX = Math.min(rect.right, parentRect.right) - Math.max(rect.left, parentRect.left)
+        let visiblePixelY = Math.min(rect.bottom, parentRect.bottom) - Math.max(rect.top, parentRect.top)
+        let visiblePercentageX = visiblePixelX / rect.width * 100
+        let visiblePercentageY = visiblePixelY / rect.height * 100
+
+        return visiblePercentageX + tolerance > x && visiblePercentageY + tolerance > y
+      })
     }
 
     /**
