@@ -891,7 +891,8 @@ if (!NGN) {
 
     /**
      * @property {boolean} inViewport
-     * Determines whether the registry element (#selector) is in the viewport or not.
+     * Determines whether the registry element (#selector) is
+     * completely in the viewport or not.
      */
     get inViewport () {
       return this.elementInViewport(this.self.element)
