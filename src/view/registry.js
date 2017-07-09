@@ -958,6 +958,7 @@ if (!NGN) {
       let inView = this.inViewport
 
       if (this._activeViewportState !== inView) {
+        this._activeViewportState = inView
         this.emit(inView ? 'enterViewport' : 'exitViewport', this.self.element)
       }
     }
