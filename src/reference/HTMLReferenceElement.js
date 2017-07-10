@@ -1,7 +1,5 @@
-'use strict'
-
 // Throw an error if the DOM library isn't included.
-// NGN.needs(NGN, 'DOM')
+NGN.needs(NGN, 'DOM')
 
 /**
  * @class HTMLReferenceElement
@@ -394,25 +392,42 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
   wrapHandlerMethod (handlerFn) {
     const me = this
 
-    return (event) => {
-      let elements = document.querySelectorAll(this.originalselector)
+    return function (event) {
+      if (me.empty) {
+        return
+      }
+
       let referenceElement = null
 
-      for (let i = 0; i < elements.length; i++) {
-        if (elements[i] === event.target) {
-          referenceElement = event.target
+      if (me.length === 1) {
+        referenceElement = me.element
+      } else {
+        referenceElement = NGN.DOM.findParent(event.target, me.originalselector)
+
+        if (event.target !== referenceElement) {
+          let elements = document.querySelectorAll(me.originalselector)
+
+          referenceElement = null
+
+          for (let i = 0; i < elements.length; i++) {
+            if (elements[i] === event.target) {
+              referenceElement = event.target
+              break
+            }
+          }
         }
       }
 
-      referenceElement = NGN.coalesce(referenceElement, NGN.DOM.findParent(event.target, this.originalselector))
-
       if (referenceElement === null) {
-        retrun
+        return
       }
 
       event.referenceElement = referenceElement
 
-      handlerFn(event)
+      let args = NGN.slice(arguments)
+      args.shift()
+
+      handlerFn(event, ...args)
     }
   }
 
@@ -534,20 +549,20 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
 
     if (typeof scope === 'object') {
       for (let eventName in scope) {
-        let fn = function (evt) {
-          scope[eventName].apply(...arguments)
+        let fn = function () {
+          me.wrapHandlerMethod(scope[eventName]).apply(me, arguments)
           me.off(eventName, fn)
         }
 
-        elements.forEach((element) => element.addEventListener(eventName, this.wrapHandlerMethod(fn)))
+        elements.forEach((element) => element.addEventListener(eventName, fn))
       }
     } else {
-      let fn = function (evt) {
-        handlerFn.apply(...arguments)
+      let fn = function () {
+        me.wrapHandlerMethod(handlerFn).apply(me, arguments)
         me.off(scope, fn)
       }
 
-      elements.forEach((element) => element.addEventListener(scope, this.wrapHandlerMethod(fn)))
+      elements.forEach((element) => element.addEventListener(scope, fn))
     }
   }
 
@@ -585,10 +600,18 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
 
     if (typeof scope === 'object') {
       for (let eventName in scope) {
-        elements.forEach((element) => element.removeEventListener(eventName, this.wrapHandlerMethod(scope[eventName])))
+        if (scope[eventName].toString().indexOf('wrapHandlerMethod') < 0) {
+          scope[eventName] = this.wrapHandlerMethod(scope[eventName])
+        }
+
+        elements.forEach((element) => element.removeEventListener(eventName, scope[eventName]))
       }
     } else {
-      elements.forEach((element) => element.removeEventListener(scope, this.wrapHandlerMethod(handlerFn)))
+      if (handlerFn.toString().indexOf('wrapHandlerMethod') < 0) {
+        handlerFn = this.wrapHandlerMethod(handlerFn)
+      }
+
+      elements.forEach((element) => element.removeEventListener(scope, handlerFn))
     }
   }
 
@@ -642,9 +665,7 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
       return
     }
 
-    if (!NGN.BUS) {
-      throw new MissingDependencyError('NGN.BUS is missing. HTMLReferenceElement.forward requires this to work.')
-    }
+    NGN.needs(NGN, 'BUS')
 
     if (typeof sourceEvent === 'object' && typeof targetEvent === 'boolean') {
       preventDefault = targetEvent
