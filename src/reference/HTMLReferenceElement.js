@@ -406,14 +406,23 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
 
         if (event.target !== referenceElement) {
           let elements = document.querySelectorAll(me.originalselector)
-
-          referenceElement = null
+          let found = false
 
           for (let i = 0; i < elements.length; i++) {
-            if (elements[i] === event.target) {
-              referenceElement = event.target
+            if (elements[i] === referenceElement) {
+              found = true
               break
             }
+
+            if (elements[i] === event.target) {
+              referenceElement = event.target
+              found = true
+              break
+            }
+          }
+
+          if (!found) {
+            return
           }
         }
       }
