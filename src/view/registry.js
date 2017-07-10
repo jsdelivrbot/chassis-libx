@@ -127,6 +127,8 @@ if (!NGN) {
         }
       }
 
+      cfg.selector = NGN.DOM.normalizeSelector(cfg.selector)
+
       // If there are references, scope them according to the selector.
       if (cfg.hasOwnProperty('references')) {
         // let refMap = cfg.references
@@ -150,7 +152,7 @@ if (!NGN) {
         cfg.references = flattenReferences(cfg.references)
 
         Object.keys(cfg.references).forEach((r) => {
-          cfg.references[r] = `${cfg.selector} ${cfg.references[r]}`
+          cfg.references[r] = NGN.DOM.normalizeSelector(`${cfg.selector} ${cfg.references[r]}`)
         })
       }
 

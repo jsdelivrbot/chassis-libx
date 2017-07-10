@@ -384,6 +384,39 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
   }
 
   /**
+   * @method wrapHandlerMethod
+   * Applies a `referenceElement` to an event before it is passed to a handler.
+   * @param  {function} handlerFn
+   * The event handler function to wrap.
+   * @return {function}
+   * @private
+   */
+  wrapHandlerMethod (handlerFn) {
+    const me = this
+
+    return (event) => {
+      let elements = document.querySelectorAll(this.originalselector)
+      let referenceElement = null
+
+      for (let i = 0; i < elements.length; i++) {
+        if (elements[i] === event.target) {
+          referenceElement = event.target
+        }
+      }
+
+      referenceElement = NGN.coalesce(referenceElement, NGN.DOM.findParent(event.target, this.originalselector))
+
+      if (referenceElement === null) {
+        retrun
+      }
+
+      event.referenceElement = referenceElement
+
+      handlerFn(event)
+    }
+  }
+
+  /**
    * @method on
    * Apply event handlers for one or more events. This is similar to the native
    * `addEventListener` method with a multiple distinct differences.
@@ -455,10 +488,10 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
 
     if (typeof scope === 'object') {
       for (let eventName in scope) {
-        elements.forEach((element) => element.addEventListener(eventName, scope[eventName]))
+        elements.forEach((element) => element.addEventListener(eventName, this.wrapHandlerMethod(scope[eventName])))
       }
     } else {
-      elements.forEach((element) => element.addEventListener(scope, handlerFn))
+      elements.forEach((element) => element.addEventListener(scope, this.wrapHandlerMethod(handlerFn)))
     }
   }
 
@@ -506,7 +539,7 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
           me.off(eventName, fn)
         }
 
-        elements.forEach((element) => element.addEventListener(eventName, fn))
+        elements.forEach((element) => element.addEventListener(eventName, this.wrapHandlerMethod(fn)))
       }
     } else {
       let fn = function (evt) {
@@ -514,7 +547,7 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
         me.off(scope, fn)
       }
 
-      elements.forEach((element) => element.addEventListener(scope, fn))
+      elements.forEach((element) => element.addEventListener(scope, this.wrapHandlerMethod(fn)))
     }
   }
 
@@ -552,10 +585,10 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
 
     if (typeof scope === 'object') {
       for (let eventName in scope) {
-        elements.forEach((element) => element.removeEventListener(eventName, scope[eventName]))
+        elements.forEach((element) => element.removeEventListener(eventName, this.wrapHandlerMethod(scope[eventName])))
       }
     } else {
-      elements.forEach((element) => element.removeEventListener(scope, handlerFn))
+      elements.forEach((element) => element.removeEventListener(scope, this.wrapHandlerMethod(handlerFn)))
     }
   }
 
@@ -633,7 +666,7 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
           NGN.BUS.emit(sourceEvent[eventName], evt)
         }
 
-        elements.forEach((element) => element.addEventListener(eventName, fn))
+        elements.forEach((element) => element.addEventListener(eventName, this.wrapHandlerMethod(fn)))
       }
     } else {
       let fn = (evt) => {
@@ -644,7 +677,7 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
         NGN.BUS.emit(targetEvent, evt)
       }
 
-      elements.forEach((element) => element.addEventListener(sourceEvent, fn))
+      elements.forEach((element) => element.addEventListener(sourceEvent, this.wrapHandlerMethod(fn)))
     }
   }
 
