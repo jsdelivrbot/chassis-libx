@@ -1,7 +1,7 @@
 'use strict'
 
 // The last command line argument.
-const mode = (process.env.hasOwnProperty('BUILD_MODE') ? process.env.BUILD_MODE : 'dev').toLowerCase()
+var mode = (process.env.hasOwnProperty('BUILD_MODE') ? process.env.BUILD_MODE : 'dev').toLowerCase()
 
 // Karma configuration
 // Generated on Thu Nov 12 2015 07:04:29 GMT-0600 (CST)
@@ -14,7 +14,7 @@ var reporterEngines = ['spec']
 var customLaunchers = {}
 var browsers = ['chrome']
 var sauceConfiguration = {
-  testName: 'NGNX Chassis JS Lib Unit Tests',
+  testName: 'NGNX UI Unit Tests',
   build: process.env.SEMAPHORE_BUILD_NUMBER || 1,
   recordVideo: false,
   recordScreenshots: false
@@ -138,8 +138,9 @@ switch (mode) {
 
   default:
     useDistributionFiles = false
-    // dev mode
+
     _browser = 'Chrome'
+
     if (process.argv.indexOf('--firefox') >= 0) {
       _browser = 'Firefox'
     }
@@ -151,6 +152,12 @@ switch (mode) {
     if (process.argv.indexOf('--edge') >= 0) {
       _browser = 'Edge'
     }
+
+    if (process.argv.indexOf('--ie') >= 0) {
+      _browser = 'IE'
+      useDistributionFiles = true
+    }
+
     break
 }
 

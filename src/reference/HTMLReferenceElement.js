@@ -1,5 +1,5 @@
 // Throw an error if the DOM library isn't included.
-NGN.needs(NGN, 'DOM')
+// NGN.needs(NGN, 'DOM')
 
 /**
  * @class HTMLReferenceElement
@@ -674,7 +674,7 @@ class HTMLReferenceElement { // eslint-disable-line no-unused-vars
       return
     }
 
-    NGN.needs(NGN, 'BUS')
+    // NGN.needs(NGN, 'BUS')
 
     if (typeof sourceEvent === 'object' && typeof targetEvent === 'boolean') {
       preventDefault = targetEvent
